@@ -1,19 +1,45 @@
-# Ignore everything under the storage/app-dev directory
-storage/app-dev
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
 
-# Ignore .umi and .umi-production directories wherever they are
-**/.umi
-**/.umi-production
+# Git
+.git
+.gitignore
 
-# Ignore certain directories under packages
-packages/*/*/lib
-packages/*/*/esm
-packages/*/*/es
-packages/*/*/dist
-packages/*/*/node_modules
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
 
-/.vscode
-/.idea
+# OS
+.DS_Store
+Thumbs.db
 
-*.sqlite
-/uploads
+# Build
+dist
+build
+*.tsbuildinfo
+
+# Storage
+storage/db
+storage/logs
+storage/uploads
+
+# Docker
+docker/*/storage
+Dockerfile*
+docker-compose*.yml
+*.tar.gz
+
+# Temp
+tmp
+temp
+*.log
+
+# Tests
+coverage
+.nyc_output
+

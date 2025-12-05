@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wintent 样式调试工具</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 { color: #2f55d4; margin-top: 0; }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success { color: #52c41a; }
+        .error { color: #ff4d4f; }
+        .warning { color: #faad14; }
+        button {
+            background: #2f55d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1d3db8; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Wintent 样式调试工具</h1>
+    
+    <div class="section">
+        <h2>说明</h2>
+        <p>请在 <strong>http://localhost:13000</strong> 页面的浏览器控制台中，复制粘贴下面的脚本并执行。</p>
+        <button onclick="copyScript()">📋 复制调试脚本</button>
+    </div>
+
+    <div class="section">
+        <h2>调试脚本</h2>
+        <pre id="script">// ========================================
+// Wintent 样式调试脚本
+// ========================================
+
+console.clear();
+console.log('%c🔍 Wintent 样式诊断开始', 'color: #2f55d4; font-size: 16px; font-weight: bold;');
+console.log('='.repeat(60));
+
+// 1. 检查插件是否加载
+console.log('\n%c1️⃣ 检查 Wintent 插件加载状态', 'color: #1890ff; font-weight: bold;');
+const styleTag = document.getElementById('wintent-custom-styles');
+if (styleTag) {
+    console.log('%c✅ Wintent 样式标签已注入', 'color: #52c41a;');
+    console.log('样式内容长度:', styleTag.textContent.length, '字符');
+} else {
+    console.log('%c❌ Wintent 样式标签未找到！', 'color: #ff4d4f;');
+    console.log('可能原因：');
+    console.log('  1. 插件未启用');
+    console.log('  2. 插件未正确编译');
+    console.log('  3. 浏览器缓存问题');
+}
+
+// 2. 检查 Header 元素
+console.log('\n%c2️⃣ 检查 Header 元素', 'color: #1890ff; font-weight: bold;');
+const header = document.querySelector('.ant-layout-header.ant-pro-layout-header');
+if (header) {
+    console.log('%c✅ Header 元素已找到', 'color: #52c41a;');
+    const computedStyle = window.getComputedStyle(header);
+    console.log('当前边框样式:');
+    console.log('  border-bottom:', computedStyle.borderBottom);
+    console.log('  border-block-end:', computedStyle.borderBlockEnd);
+    
+    // 检查期望的样式
+    const expectedBorder = '1px solid rgba(5, 5, 5, 0.06)';
+    const currentBorder = computedStyle.borderBottom;
+    if (currentBorder.includes('rgba(5, 5, 5, 0.06)') || currentBorder.includes('1px solid')) {
+        console.log('%c✅ 边框样式已正确应用！', 'color: #52c41a;');
+    } else {
+        console.log('%c⚠️ 边框样式可能未生效', 'color: #faad14;');
+        console.log('期望值:', expectedBorder);
+        console.log('实际值:', currentBorder);
+    }
+} else {
+    console.log('%c❌ Header 元素未找到', 'color: #ff4d4f;');
+}
+
+// 3. 查找所有相关的 CSS 规则
+console.log('\n%c3️⃣ 查找所有 Header 相关的 CSS 规则', 'color: #1890ff; font-weight: bold;');
+let ruleCount = 0;
+try {
+    const sheets = Array.from(document.styleSheets);
+    sheets.forEach((sheet, index) => {
+        try {
+            const rules = Array.from(sheet.cssRules || sheet.rules || []);
+            rules.forEach(rule => {
+                if (rule.selectorText && rule.selectorText.includes('ant-layout-header')) {
+                    const borderStyle = rule.style.borderBlockEnd || rule.style.borderBottom;
+                    if (borderStyle) {
+                        ruleCount++;
+                        console.log(`规则 ${ruleCount}:`, rule.selectorText);
+                        console.log('  border:', borderStyle);
+                        console.log('  来源:', sheet.href || '内联样式');
+                    }
+                }
+            });
+        } catch (e) {
+            // CORS 限制，忽略
+        }
+    });
+    if (ruleCount === 0) {
+        console.log('%c⚠️ 未找到任何 Header 边框规则', 'color: #faad14;');
+    }
+} catch (error) {
+    console.error('查找 CSS 规则时出错:', error);
+}
+
+// 4. 手动应用样式（临时测试）
+console.log('\n%c4️⃣ 手动应用样式（临时测试）', 'color: #1890ff; font-weight: bold;');
+if (header) {
+    header.style.borderBottom = '1px solid rgba(5, 5, 5, 0.06)';
+    header.style.borderBlockEnd = '1px solid rgba(5, 5, 5, 0.06)';
+    console.log('%c✅ 已手动应用边框样式（临时）', 'color: #52c41a;');
+    console.log('如果现在可以看到边框，说明选择器有效，问题可能在于样式优先级或插件加载时机');
+}
+
+// 5. 总结
+console.log('\n%c📊 诊断总结', 'color: #2f55d4; font-size: 14px; font-weight: bold;');
+console.log('='.repeat(60));
+if (styleTag && header) {
+    console.log('%c✅ 基础检查通过', 'color: #52c41a;');
+    console.log('建议操作:');
+    console.log('  1. 检查上面显示的实际边框值是否符合预期');
+    console.log('  2. 如果手动应用后可见，可能需要调整 CSS 优先级');
+    console.log('  3. 清除浏览器缓存后重新加载');
+} else {
+    console.log('%c❌ 检查失败', 'color: #ff4d4f;');
+    if (!styleTag) {
+        console.log('  - 请确保 @wintent/plugin-config 插件已启用');
+        console.log('  - 运行: yarn pm enable @wintent/plugin-config');
+    }
+    if (!header) {
+        console.log('  - 确保您在正确的页面上（应该有 Header）');
+    }
+}
+console.log('\n%c🎉 诊断完成！', 'color: #2f55d4; font-size: 16px; font-weight: bold;');</pre>
+    </div>
+
+    <script>
+        function copyScript() {
+            const script = document.getElementById('script').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert('✅ 脚本已复制到剪贴板！\n\n请在 http://localhost:13000 页面的控制台（F12）中粘贴并执行。');
+            }).catch(err => {
+                alert('复制失败，请手动复制脚本内容');
+            });
+        }
+    </script>
+</body>
+</html>
+

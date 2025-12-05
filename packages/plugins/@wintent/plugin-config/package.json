@@ -1,0 +1,17 @@
+{
+  "name": "@wintent/plugin-config",
+  "displayName": "Wintent Configuration",
+  "displayName.zh-CN": "Wintent 定制配置",
+  "description": "Wintent custom configuration plugin for system branding and defaults.",
+  "description.zh-CN": "Wintent 定制配置插件，用于设置系统品牌和默认值。",
+  "version": "2.0.0-alpha.49",
+  "main": "dist/server/index.js",
+  "dependencies": {},
+  "peerDependencies": {
+    "@nocobase/client": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x",
+    "@nocobase/database": "2.x",
+    "@nocobase/plugin-file-manager": "2.x"
+  }
+}

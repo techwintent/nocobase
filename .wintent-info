@@ -1,0 +1,16 @@
+# Wintent NocoBase 配置信息
+# 此文件用于快速查看配置
+
+系统名称: Wintent
+Logo: 蓝色波浪图案
+Favicon: icon_square.ico
+管理员邮箱: admin@wintent.tech
+管理员密码: admin123
+数据库: wintent/wintent/wintent
+访问地址: http://localhost:13000
+默认主题: Default (Wintent 蓝色)
+主题色: #2f55d4 (蓝色)
+设置色: #F18B62 (橙色)
+
+安装命令: ./wintent-setup.sh
+文档: WINTENT.md

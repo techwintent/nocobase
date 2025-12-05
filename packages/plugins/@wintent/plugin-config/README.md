@@ -1,0 +1,1 @@
+# @wintent/plugin-config

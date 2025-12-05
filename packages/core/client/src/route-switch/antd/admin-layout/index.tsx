@@ -493,8 +493,9 @@ const resetStyle = css`
     margin-inline-end: 0 !important;
   }
 
+  // Wintent 定制：添加 header 底部边框
   .ant-layout-header.ant-pro-layout-header {
-    border-block-end: none !important;
+    border-block-end: 1px solid rgba(5, 5, 5, 0.06) !important;
   }
 
   // 固定菜单中图标和标题的距离，防止当切换到紧凑模式后，图标和标题之间的距离过近

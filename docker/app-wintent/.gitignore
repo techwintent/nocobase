@@ -1,0 +1,10 @@
+# 忽略数据目录
+storage/
+
+# 忽略环境变量文件
+.env
+
+# 保留示例文件
+!.env.example
+!env.example
+

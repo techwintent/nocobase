@@ -1,0 +1,60 @@
+# Wintent 定制 NocoBase Docker 镜像
+# 基于项目源码构建，包含所有 Wintent 定制化修改
+
+FROM node:20-bookworm-slim as builder
+
+WORKDIR /app/nocobase
+
+# 复制项目源码和配置文件
+COPY package.json yarn.lock* ./
+COPY tsconfig*.json ./
+COPY .env* ./
+COPY packages ./packages
+
+# 安装依赖
+RUN yarn config set network-timeout 600000 -g && \
+    yarn install --production=false
+
+# 编译 Wintent 插件
+RUN yarn build @wintent/plugin-config --no-dts
+
+# 编译核心客户端（包含 Wintent 样式修改）
+RUN yarn build @nocobase/client --no-dts
+
+# 编译所有包
+RUN yarn build
+
+# 清理开发依赖
+RUN yarn install --production && \
+    yarn cache clean && \
+    rm -rf yarn.lock && \
+    find node_modules -type f -name "yarn.lock" -delete
+
+# 最终镜像
+FROM node:20-bookworm-slim
+
+# 安装运行时依赖
+RUN apt-get update && apt-get install -y \
+    nginx \
+    libaio1 \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制编译好的应用
+COPY --from=builder /app/nocobase /app/nocobase
+
+# 设置工作目录
+WORKDIR /app/nocobase
+
+# 复制启动脚本（路径相对于构建上下文，即项目根目录）
+COPY docker/app-wintent/docker-entrypoint-wintent.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# 环境变量
+ENV NODE_ENV=production
+ENV APP_ENV=production
+
+EXPOSE 13000
+
+CMD ["/app/docker-entrypoint.sh"]
+
