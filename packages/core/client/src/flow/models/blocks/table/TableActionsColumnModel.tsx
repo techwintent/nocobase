@@ -26,6 +26,7 @@ import React from 'react';
 import { ActionModel } from '../../base';
 import { TableCustomColumnModel } from './TableCustomColumnModel';
 import { getRowKey } from './utils';
+import { FormBlockModel } from '../form/FormBlockModel';
 
 const recordIdentityByFork = new WeakMap<ForkFlowModel<any>, string>();
 
@@ -111,10 +112,13 @@ const Columns = observer<any>(({ record, model, index }) => {
   );
 });
 
-const AddActionToolbarComponent = ({ model }) => {
+const AddActionToolbarComponent = observer(({ model }: any) => {
+  const blockModel = model?.context?.blockModel as any;
+  const propsTreeTable = blockModel?.props?.treeTable;
+
   return (
     <AddSubModelButton
-      key="table-row-actions-add"
+      key={`table-row-actions-add-${propsTreeTable ? 'tree' : 'flat'}`}
       model={model}
       subModelBaseClass={model.context.getModelClassName('RecordActionGroupModel')}
       subModelKey="actions"
@@ -125,7 +129,7 @@ const AddActionToolbarComponent = ({ model }) => {
       <PlusOutlined />
     </AddSubModelButton>
   );
-};
+});
 
 export class TableActionsColumnModel extends TableCustomColumnModel {
   async afterAddAsSubModel() {
@@ -214,5 +218,9 @@ TableActionsColumnModel.define({
         },
       },
     },
+  },
+  hide(ctx) {
+    //子表格中隐藏这个Action
+    return ctx.disableFieldClickToOpen;
   },
 });

@@ -108,6 +108,8 @@ export class SubTableFieldModel extends AssociationFieldModel {
         columns={columns}
         components={components}
         isConfigMode={isConfigMode}
+        parentFieldIndex={this.context.fieldIndex}
+        parentItem={this.context.item}
         filterTargetKey={this.collection.filterTargetKey}
       />
     );
@@ -241,7 +243,7 @@ SubTableFieldModel.registerFlow({
   },
   steps: {
     openView: {
-      title: tExpr('Edit select record popup'),
+      title: tExpr('Edit popup (Select record)'),
       hideInSettings(ctx) {
         const allowSelectExistingRecord = ctx.model.getStepParams?.(
           'subTableColumnSettings',
@@ -368,11 +370,12 @@ SubTableFieldModel.registerFlow({
 });
 
 SubTableFieldModel.define({
-  label: tExpr('Sub-table'),
+  label: tExpr('Subtable (Inline editing)'),
 });
 export { SubTableColumnModel };
 
 FormItemModel.bindModelToInterface('SubTableFieldModel', ['m2m', 'o2m', 'mbm'], {
+  order: 200,
   when: (ctx, field) => {
     if (field.targetCollection) {
       return field.targetCollection.template !== 'file';

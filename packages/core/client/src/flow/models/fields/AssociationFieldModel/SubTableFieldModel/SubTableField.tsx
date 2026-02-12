@@ -31,6 +31,8 @@ export function SubTableField(props) {
     pageSize,
     allowCreate, //acl
     isConfigMode,
+    parentFieldIndex,
+    parentItem,
     resetPage,
     filterTargetKey = 'id',
   } = props;
@@ -111,8 +113,10 @@ export function SubTableField(props) {
           rowIdx: pageRowIdx,
           id: `field-${col.dataIndex}-${rowIdx}`,
           value: text,
+          parentFieldIndex,
+          parentItem,
           onChange: (value) => {
-            handleCellChange(rowIdx, col.dataIndex, value?.target?.value || value);
+            handleCellChange(pageRowIdx, col.dataIndex, value?.target?.value || value);
           },
           ['aria-describedby']: `field-${col.dataIndex}-${rowIdx}`,
         });
@@ -189,7 +193,7 @@ export function SubTableField(props) {
                     {t('Add new')}
                   </Button>
                 ) : (
-                  <ActionWithoutPermission message={t('Not allow to create')} forbidden={{ actionName: 'create' }}>
+                  <ActionWithoutPermission message={t('No permission to add new')} forbidden={{ actionName: 'create' }}>
                     <Button type="link" disabled>
                       <PlusOutlined />
                       {t('Add new')}

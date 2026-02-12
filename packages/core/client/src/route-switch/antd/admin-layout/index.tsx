@@ -707,7 +707,7 @@ const GlobalStyle = () => {
   return <El />;
 };
 
-export const InternalAdminLayout = () => {
+export const InternalAdminLayout = (props) => {
   const { allAccessRoutes } = useAllAccessDesktopRoutes();
   const { designable: _designable } = useDesignable();
   const location = useLocation();
@@ -792,6 +792,7 @@ export const InternalAdminLayout = () => {
       <div id="nocobase-app-container" style={appContainerStyle}>
         <DndContext onDragEnd={onDragEnd}>
           <ProLayout
+            {...props}
             contentStyle={contentStyle}
             siderWidth={token.siderWidth || 200}
             className={resetStyle}
