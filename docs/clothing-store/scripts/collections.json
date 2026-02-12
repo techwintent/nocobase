@@ -1,0 +1,1571 @@
+{
+  "collections": [
+    {
+      "name": "stores",
+      "title": "门店",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "门店名称", "required": true }
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "length": 50,
+          "interface": "input",
+          "uiSchema": { "title": "门店编码" }
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "length": 50,
+          "interface": "select",
+          "uiSchema": {
+            "title": "门店类型",
+            "enum": ["直营", "加盟", "批发", "零售"]
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active",
+          "interface": "select",
+          "uiSchema": {
+            "title": "状态",
+            "enum": ["active", "inactive", "closed"]
+          }
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "length": 50,
+          "interface": "phone",
+          "uiSchema": { "title": "电话" }
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "length": 500,
+          "interface": "textarea",
+          "uiSchema": { "title": "地址" }
+        },
+        {
+          "name": "province",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "省份" }
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "城市" }
+        },
+        {
+          "name": "district",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "区县" }
+        },
+        {
+          "name": "manager_name",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "负责人" }
+        },
+        {
+          "name": "manager_phone",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "负责人电话" }
+        },
+        {
+          "name": "ext_json",
+          "type": "json",
+          "interface": "json",
+          "uiSchema": { "title": "扩展字段" }
+        },
+        {
+          "name": "remark",
+          "type": "text",
+          "interface": "textarea",
+          "uiSchema": { "title": "备注" }
+        },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "createdById", "type": "bigInt", "interface": "createdBy" },
+        { "name": "updatedById", "type": "bigInt", "interface": "updatedBy" },
+        {
+          "name": "deletedAt",
+          "type": "date",
+          "uiSchema": { "title": "删除时间" }
+        }
+      ]
+    },
+    {
+      "name": "suppliers",
+      "title": "供应商",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "供应商名称", "required": true }
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "编码" }
+        },
+        {
+          "name": "contact_name",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "联系人" }
+        },
+        {
+          "name": "contact_phone",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "联系电话" }
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "length": 500,
+          "uiSchema": { "title": "地址" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "remark", "type": "text" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "brands",
+      "title": "品牌",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "品牌名称", "required": true }
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "编码" }
+        },
+        {
+          "name": "logo",
+          "type": "string",
+          "length": 500,
+          "uiSchema": { "title": "Logo URL" }
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "uiSchema": { "title": "描述" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "categories",
+      "title": "类别",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "parent_id",
+          "type": "bigInt",
+          "defaultValue": 0,
+          "uiSchema": { "title": "父级ID" }
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "类别名称", "required": true }
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "编码" }
+        },
+        {
+          "name": "level",
+          "type": "integer",
+          "defaultValue": 1,
+          "uiSchema": { "title": "层级" }
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "路径" }
+        },
+        {
+          "name": "sort_order",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "排序" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "employees",
+      "title": "员工",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 50,
+          "interface": "input",
+          "uiSchema": { "title": "姓名", "required": true }
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "手机" }
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "角色" }
+        },
+        {
+          "name": "store_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "所属门店" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "vip_levels",
+      "title": "VIP等级",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 50,
+          "interface": "input",
+          "uiSchema": { "title": "等级名称", "required": true }
+        },
+        {
+          "name": "level",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "等级序号" }
+        },
+        {
+          "name": "discount",
+          "type": "decimal",
+          "precision": 5,
+          "scale": 2,
+          "uiSchema": { "title": "折扣" }
+        },
+        {
+          "name": "price_level",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "适用价格" }
+        },
+        {
+          "name": "min_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "升级所需金额" }
+        },
+        {
+          "name": "min_points",
+          "type": "integer",
+          "uiSchema": { "title": "升级所需积分" }
+        },
+        {
+          "name": "benefits",
+          "type": "json",
+          "uiSchema": { "title": "权益列表" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" }
+      ]
+    },
+    {
+      "name": "products",
+      "title": "商品",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "spu_code",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "款号", "required": true }
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 255,
+          "interface": "input",
+          "uiSchema": { "title": "名称" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active",
+          "interface": "select",
+          "uiSchema": {
+            "title": "状态",
+            "enum": ["active", "inactive", "discontinued"]
+          }
+        },
+        {
+          "name": "cost_price",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "采购价" }
+        },
+        {
+          "name": "price_1",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格1(零售)" }
+        },
+        {
+          "name": "price_2",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格2(批发)" }
+        },
+        {
+          "name": "price_3",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格3(VIP)" }
+        },
+        {
+          "name": "price_4",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格4" }
+        },
+        {
+          "name": "price_5",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格5" }
+        },
+        {
+          "name": "discount",
+          "type": "decimal",
+          "precision": 5,
+          "scale": 2,
+          "uiSchema": { "title": "产品折扣" }
+        },
+        {
+          "name": "supplier_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "供应商ID" }
+        },
+        {
+          "name": "supplier_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "供应商名称" }
+        },
+        {
+          "name": "brand_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "品牌ID" }
+        },
+        {
+          "name": "brand_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "品牌名称" }
+        },
+        {
+          "name": "category_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "类别ID" }
+        },
+        {
+          "name": "category_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "类别名称" }
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "面料" }
+        },
+        {
+          "name": "lining",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "里料" }
+        },
+        {
+          "name": "accessory",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "配料" }
+        },
+        {
+          "name": "style",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "风格" }
+        },
+        {
+          "name": "season",
+          "type": "string",
+          "length": 50,
+          "interface": "select",
+          "uiSchema": {
+            "title": "季节",
+            "enum": ["春", "夏", "秋", "冬", "四季"]
+          }
+        },
+        {
+          "name": "year",
+          "type": "string",
+          "length": 10,
+          "uiSchema": { "title": "年份" }
+        },
+        {
+          "name": "listed_at",
+          "type": "date",
+          "uiSchema": { "title": "上架日期" }
+        },
+        {
+          "name": "sales_cycle",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "款号销售周期" }
+        },
+        {
+          "name": "is_special",
+          "type": "boolean",
+          "defaultValue": false,
+          "uiSchema": { "title": "是否特价商品" }
+        },
+        {
+          "name": "exec_standard",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "执行标准" }
+        },
+        {
+          "name": "safety_category",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "安全类别" }
+        },
+        {
+          "name": "quality_grade",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "等级" }
+        },
+        {
+          "name": "inspector",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "检验员" }
+        },
+        {
+          "name": "origin",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "产地" }
+        },
+        {
+          "name": "main_image",
+          "type": "string",
+          "length": 500,
+          "uiSchema": { "title": "主图URL" }
+        },
+        {
+          "name": "images",
+          "type": "json",
+          "uiSchema": { "title": "图片列表" }
+        },
+        {
+          "name": "total_stock",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "总库存" }
+        },
+        {
+          "name": "total_sold",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "总销量" }
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "件",
+          "uiSchema": { "title": "计量单位" }
+        },
+        {
+          "name": "ext_json",
+          "type": "json",
+          "uiSchema": { "title": "扩展字段" }
+        },
+        { "name": "remark", "type": "text", "uiSchema": { "title": "备注" } },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "createdById", "type": "bigInt", "interface": "createdBy" },
+        { "name": "updatedById", "type": "bigInt", "interface": "updatedBy" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "skus",
+      "title": "SKU",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "product_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "商品ID", "required": true }
+        },
+        {
+          "name": "spu_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "款号" }
+        },
+        {
+          "name": "sku_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "SKU编码" }
+        },
+        {
+          "name": "barcode",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "条码" }
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "颜色" }
+        },
+        {
+          "name": "color_code",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "颜色编码" }
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "尺码" }
+        },
+        {
+          "name": "cost_price",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "进货价" }
+        },
+        {
+          "name": "price_1",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格1" }
+        },
+        {
+          "name": "price_2",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格2" }
+        },
+        {
+          "name": "price_3",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格3" }
+        },
+        {
+          "name": "price_4",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格4" }
+        },
+        {
+          "name": "price_5",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "价格5" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active"
+        },
+        {
+          "name": "image",
+          "type": "string",
+          "length": 500,
+          "uiSchema": { "title": "SKU图片" }
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "inventory",
+      "title": "库存",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "store_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "门店ID", "required": true }
+        },
+        {
+          "name": "store_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "门店名称" }
+        },
+        {
+          "name": "product_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "商品ID", "required": true }
+        },
+        {
+          "name": "sku_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "SKU ID", "required": true }
+        },
+        {
+          "name": "spu_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "款号" }
+        },
+        {
+          "name": "sku_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "SKU编码" }
+        },
+        {
+          "name": "barcode",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "条码" }
+        },
+        {
+          "name": "product_name",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "商品名称" }
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "颜色" }
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "尺码" }
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "当前库存" }
+        },
+        {
+          "name": "available_qty",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "可用库存" }
+        },
+        {
+          "name": "locked_qty",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "锁定库存" }
+        },
+        {
+          "name": "min_stock",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "最低库存预警" }
+        },
+        {
+          "name": "max_stock",
+          "type": "integer",
+          "uiSchema": { "title": "最高库存预警" }
+        },
+        {
+          "name": "avg_cost",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "平均成本" }
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "库位" }
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" }
+      ]
+    },
+    {
+      "name": "customers",
+      "title": "客户",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 100,
+          "interface": "input",
+          "uiSchema": { "title": "客户名称" }
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "length": 50,
+          "interface": "phone",
+          "uiSchema": { "title": "手机" }
+        },
+        {
+          "name": "phone_masked",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "脱敏手机号" }
+        },
+        {
+          "name": "gender",
+          "type": "string",
+          "length": 10,
+          "interface": "select",
+          "uiSchema": { "title": "性别", "enum": ["男", "女", "未知"] }
+        },
+        { "name": "birthday", "type": "date", "uiSchema": { "title": "生日" } },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "active",
+          "interface": "select",
+          "uiSchema": {
+            "title": "状态",
+            "enum": ["active", "inactive", "blacklist"]
+          }
+        },
+        {
+          "name": "vip_level_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "VIP等级ID" }
+        },
+        {
+          "name": "vip_level_name",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "VIP等级名称" }
+        },
+        {
+          "name": "paid_member_level",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "付费会员等级" }
+        },
+        {
+          "name": "member_expire_at",
+          "type": "date",
+          "uiSchema": { "title": "会员到期时间" }
+        },
+        {
+          "name": "customer_discount",
+          "type": "decimal",
+          "precision": 5,
+          "scale": 2,
+          "uiSchema": { "title": "客户折扣" }
+        },
+        {
+          "name": "price_level",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "适用价格" }
+        },
+        {
+          "name": "balance",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "储值余额" }
+        },
+        {
+          "name": "principal_balance",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "本金余额" }
+        },
+        {
+          "name": "gift_balance",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "赠金余额" }
+        },
+        {
+          "name": "credit_balance",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "货款余额" }
+        },
+        {
+          "name": "points",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "剩余积分" }
+        },
+        {
+          "name": "total_orders",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "购买次数" }
+        },
+        {
+          "name": "total_amount",
+          "type": "decimal",
+          "precision": 14,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "购买金额" }
+        },
+        {
+          "name": "last_order_at",
+          "type": "date",
+          "uiSchema": { "title": "上次消费日期" }
+        },
+        {
+          "name": "last_order_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "上次消费金额" }
+        },
+        {
+          "name": "days_since_last",
+          "type": "integer",
+          "uiSchema": { "title": "未消费天数" }
+        },
+        {
+          "name": "avg_order_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "平均客单价" }
+        },
+        {
+          "name": "store_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "所属门店" }
+        },
+        {
+          "name": "employee_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "所属员工ID" }
+        },
+        {
+          "name": "employee_name",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "所属员工" }
+        },
+        { "name": "province", "type": "string", "length": 50 },
+        { "name": "city", "type": "string", "length": 50 },
+        { "name": "district", "type": "string", "length": 50 },
+        {
+          "name": "address",
+          "type": "string",
+          "length": 500,
+          "uiSchema": { "title": "详细地址" }
+        },
+        { "name": "tags", "type": "json", "uiSchema": { "title": "标签列表" } },
+        {
+          "name": "source",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "来源渠道" }
+        },
+        {
+          "name": "source_detail",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "来源详情" }
+        },
+        {
+          "name": "ext_json",
+          "type": "json",
+          "uiSchema": { "title": "扩展字段" }
+        },
+        { "name": "remark", "type": "text", "uiSchema": { "title": "备注" } },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "createdById", "type": "bigInt", "interface": "createdBy" },
+        { "name": "updatedById", "type": "bigInt", "interface": "updatedBy" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "sales_orders",
+      "title": "销售单",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        { "name": "uuid", "type": "uuid", "unique": true },
+        {
+          "name": "order_no",
+          "type": "string",
+          "length": 50,
+          "unique": true,
+          "uiSchema": { "title": "单据编号", "required": true }
+        },
+        {
+          "name": "batch_no",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "批次号" }
+        },
+        {
+          "name": "order_type",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "sale",
+          "interface": "select",
+          "uiSchema": {
+            "title": "单据类型",
+            "enum": ["sale", "return", "exchange"]
+          }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "completed",
+          "interface": "select",
+          "uiSchema": {
+            "title": "状态",
+            "enum": ["pending", "completed", "cancelled", "refunded"]
+          }
+        },
+        {
+          "name": "store_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "门店ID" }
+        },
+        {
+          "name": "store_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "门店名称" }
+        },
+        {
+          "name": "customer_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "客户ID" }
+        },
+        {
+          "name": "customer_name",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "客户名称" }
+        },
+        {
+          "name": "customer_phone",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "客户手机" }
+        },
+        {
+          "name": "employee_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "经办人ID" }
+        },
+        {
+          "name": "employee_name",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "经办人" }
+        },
+        {
+          "name": "order_date",
+          "type": "date",
+          "uiSchema": { "title": "销售日期" }
+        },
+        {
+          "name": "order_time",
+          "type": "date",
+          "uiSchema": { "title": "销售时间" }
+        },
+        {
+          "name": "sale_qty",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "销售数" }
+        },
+        {
+          "name": "return_qty",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "退货数" }
+        },
+        {
+          "name": "actual_qty",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "实销数" }
+        },
+        {
+          "name": "sale_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "销售额" }
+        },
+        {
+          "name": "return_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "退货额" }
+        },
+        {
+          "name": "discount_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "优惠总额" }
+        },
+        {
+          "name": "other_fee",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "其他费用" }
+        },
+        {
+          "name": "receivable",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "应收" }
+        },
+        {
+          "name": "received",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "实收" }
+        },
+        {
+          "name": "coupon_deduct",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "抖音券抵扣" }
+        },
+        {
+          "name": "points_deduct",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "积分抵扣" }
+        },
+        {
+          "name": "pay_principal",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "储值本金支付" }
+        },
+        {
+          "name": "pay_gift",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "储值赠金支付" }
+        },
+        {
+          "name": "pay_qrcode",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "扫码收款" }
+        },
+        {
+          "name": "pay_cash",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "现金" }
+        },
+        {
+          "name": "pay_bank",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "银行" }
+        },
+        {
+          "name": "pay_alipay",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "支付宝" }
+        },
+        {
+          "name": "pay_wechat",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "微信" }
+        },
+        {
+          "name": "pay_other",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "其他支付" }
+        },
+        {
+          "name": "payments",
+          "type": "json",
+          "uiSchema": { "title": "支付明细" }
+        },
+        {
+          "name": "ext_json",
+          "type": "json",
+          "uiSchema": { "title": "扩展字段" }
+        },
+        { "name": "remark", "type": "text", "uiSchema": { "title": "备注" } },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" },
+        { "name": "updatedAt", "type": "date", "interface": "updatedAt" },
+        { "name": "createdById", "type": "bigInt", "interface": "createdBy" },
+        { "name": "updatedById", "type": "bigInt", "interface": "updatedBy" },
+        { "name": "deletedAt", "type": "date" }
+      ]
+    },
+    {
+      "name": "sales_items",
+      "title": "销售明细",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "order_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "销售单ID", "required": true }
+        },
+        {
+          "name": "order_no",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "单据编号" }
+        },
+        {
+          "name": "product_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "商品ID" }
+        },
+        {
+          "name": "sku_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "SKU ID" }
+        },
+        {
+          "name": "spu_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "款号" }
+        },
+        {
+          "name": "sku_code",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "SKU编码" }
+        },
+        {
+          "name": "barcode",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "条码" }
+        },
+        {
+          "name": "product_name",
+          "type": "string",
+          "length": 255,
+          "uiSchema": { "title": "商品名称" }
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "颜色" }
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "length": 20,
+          "uiSchema": { "title": "尺码" }
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "uiSchema": { "title": "数量", "required": true }
+        },
+        {
+          "name": "cost_price",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "成本价" }
+        },
+        {
+          "name": "original_price",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "原价" }
+        },
+        {
+          "name": "sell_price",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "售价" }
+        },
+        {
+          "name": "discount",
+          "type": "decimal",
+          "precision": 5,
+          "scale": 2,
+          "uiSchema": { "title": "折扣" }
+        },
+        {
+          "name": "amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "金额" }
+        },
+        {
+          "name": "discount_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "defaultValue": 0,
+          "uiSchema": { "title": "优惠金额" }
+        },
+        {
+          "name": "actual_amount",
+          "type": "decimal",
+          "precision": 12,
+          "scale": 2,
+          "uiSchema": { "title": "实际金额" }
+        },
+        { "name": "ext_json", "type": "json" },
+        { "name": "remark", "type": "string", "length": 500 }
+      ]
+    },
+    {
+      "name": "matches",
+      "title": "搭配",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "product_a_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "商品A", "required": true }
+        },
+        {
+          "name": "product_b_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "商品B", "required": true }
+        },
+        {
+          "name": "match_type",
+          "type": "string",
+          "length": 20,
+          "interface": "select",
+          "uiSchema": { "title": "搭配类型", "enum": ["auto", "manual"] }
+        },
+        {
+          "name": "co_purchase_rate",
+          "type": "decimal",
+          "precision": 5,
+          "scale": 4,
+          "uiSchema": { "title": "连带率" }
+        },
+        {
+          "name": "success_count",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "成功推荐次数" }
+        },
+        {
+          "name": "total_count",
+          "type": "integer",
+          "defaultValue": 0,
+          "uiSchema": { "title": "总推荐次数" }
+        },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" }
+      ]
+    },
+    {
+      "name": "ai_suggestions",
+      "title": "AI建议",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigInt",
+          "primaryKey": true,
+          "autoIncrement": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "length": 20,
+          "interface": "select",
+          "uiSchema": {
+            "title": "建议类型",
+            "enum": ["restock", "match", "customer", "clear"],
+            "required": true
+          }
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "length": 100,
+          "uiSchema": { "title": "建议标题", "required": true }
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "uiSchema": { "title": "建议内容", "required": true }
+        },
+        {
+          "name": "target_id",
+          "type": "bigInt",
+          "uiSchema": { "title": "关联对象ID" }
+        },
+        {
+          "name": "target_type",
+          "type": "string",
+          "length": 50,
+          "uiSchema": { "title": "关联对象类型" }
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "length": 20,
+          "defaultValue": "pending",
+          "interface": "select",
+          "uiSchema": {
+            "title": "状态",
+            "enum": ["pending", "adopted", "ignored"]
+          }
+        },
+        {
+          "name": "confidence",
+          "type": "decimal",
+          "precision": 3,
+          "scale": 2,
+          "uiSchema": { "title": "置信度" }
+        },
+        { "name": "createdAt", "type": "date", "interface": "createdAt" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@wintent/plugin-clothing-store",
+  "displayName": "Clothing Store AI Assistant",
+  "displayName.zh-CN": "服装店 AI 决策助手",
+  "description": "AI-driven decision assistant for clothing store management with intelligent recommendations.",
+  "description.zh-CN": "AI 驱动的服装店经营决策助手，提供智能搭配推荐、进货建议、客户运营等功能。",
+  "version": "2.0.0-alpha.1",
+  "main": "dist/server/index.js",
+  "dependencies": {},
+  "peerDependencies": {
+    "@nocobase/client": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x",
+    "@nocobase/database": "2.x",
+    "@nocobase/plugin-file-manager": "2.x"
+  }
+}
