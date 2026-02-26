@@ -14,7 +14,7 @@
 
 import { useAPIClient } from '@nocobase/client';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Empty, Modal, Row, Space, Typography, message } from 'antd';
+import { Button, Col, Modal, Row, Space, Typography, message } from 'antd';
 import React, { useState } from 'react';
 import { AIInsightCard } from '../components/AIInsightCard';
 import { ChangeLogCard } from '../components/ChangeLogCard';
@@ -26,15 +26,15 @@ import type { ImportResult } from '../../shared/types';
 export function DataStudioPage() {
   const api = useAPIClient();
   const [results, setResults] = useState<ImportResult[]>([]);
-  const [loading, setLoading] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
+  const [importVersion, setImportVersion] = useState(0);
 
   const handleImportComplete = (res: ImportResult[]) => {
     setResults(res);
+    setImportVersion((v) => v + 1);
   };
 
   const handleImportStart = () => {
-    setLoading(true);
     setResults([]);
   };
 
@@ -62,6 +62,7 @@ export function DataStudioPage() {
     });
   };
 
+  const refreshKey = `${resetVersion}-${importVersion}`;
   const hasResults = results.length > 0;
   const allInsights = results.flatMap((r) => r.insights ?? []);
 
@@ -82,22 +83,22 @@ export function DataStudioPage() {
       </div>
 
       <Space direction="vertical" style={{ width: '100%' }} size={24}>
-        <OverviewStatsCard key={resetVersion} />
+        <OverviewStatsCard key={refreshKey} />
 
         <DataImportCard onImportComplete={handleImportComplete} onImportStart={handleImportStart} />
 
         {hasResults && (
           <Row gutter={24}>
             <Col xs={24} lg={12}>
-              <ChangeLogCard results={results} loading={loading} />
+              <ChangeLogCard results={results} />
             </Col>
             <Col xs={24} lg={12}>
-              <AIInsightCard insights={allInsights} loading={loading} />
+              <AIInsightCard insights={allInsights} />
             </Col>
           </Row>
         )}
 
-        <SuggestionListCard key={resetVersion} />
+        <SuggestionListCard key={refreshKey} />
       </Space>
     </div>
   );

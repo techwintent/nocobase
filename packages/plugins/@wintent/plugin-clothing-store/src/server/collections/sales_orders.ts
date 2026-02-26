@@ -69,12 +69,12 @@ export default defineCollection({
       },
     },
     // 关联（外键 + 冗余）
-    { name: 'store_id', type: 'bigInt' },
+    { name: 'store_id', type: 'bigInt', index: true },
     { name: 'store_name', type: 'string' },
-    { name: 'customer_id', type: 'bigInt' },
+    { name: 'customer_id', type: 'bigInt', index: true },
     { name: 'customer_name', type: 'string' },
     { name: 'customer_phone', type: 'string' },
-    { name: 'employee_id', type: 'bigInt' },
+    { name: 'employee_id', type: 'bigInt', index: true },
     { name: 'employee_name', type: 'string' },
     // 时间
     {

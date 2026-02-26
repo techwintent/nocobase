@@ -47,6 +47,7 @@ export default defineCollection({
     {
       name: 'store_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '所属门店', 'x-component': 'InputNumber' },
     },

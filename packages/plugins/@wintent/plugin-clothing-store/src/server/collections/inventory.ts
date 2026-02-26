@@ -22,12 +22,13 @@ export default defineCollection({
     {
       name: 'store_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '门店ID', 'x-component': 'InputNumber' },
     },
     { name: 'store_name', type: 'string' },
-    { name: 'product_id', type: 'bigInt' },
-    { name: 'sku_id', type: 'bigInt' },
+    { name: 'product_id', type: 'bigInt', index: true },
+    { name: 'sku_id', type: 'bigInt', index: true },
     // 冗余信息
     {
       name: 'spu_code',

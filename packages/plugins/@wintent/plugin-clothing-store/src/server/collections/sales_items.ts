@@ -22,13 +22,14 @@ export default defineCollection({
     {
       name: 'order_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '销售单ID', 'x-component': 'InputNumber' },
     },
     { name: 'order_no', type: 'string' },
     // 商品快照
-    { name: 'product_id', type: 'bigInt' },
-    { name: 'sku_id', type: 'bigInt' },
+    { name: 'product_id', type: 'bigInt', index: true },
+    { name: 'sku_id', type: 'bigInt', index: true },
     {
       name: 'spu_code',
       type: 'string',

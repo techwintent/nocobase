@@ -14,7 +14,7 @@
 
 import { useAPIClient } from '@nocobase/client';
 import { TeamOutlined, BulbOutlined } from '@ant-design/icons';
-import { Button, Card, Collapse, Form, InputNumber, Select, Space, Tag, Typography } from 'antd';
+import { Button, Card, Collapse, Form, InputNumber, message, Select, Space, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
@@ -70,7 +70,10 @@ export function CampaignPlannerPage() {
   }, [typeFromUrl, productIdFromUrl, form]);
 
   const runPreview = async () => {
-    const values = await form.validateFields().catch(() => null);
+    const values = await form.validateFields().catch(() => {
+      message.warning('请填写必填项');
+      return null;
+    });
     if (!values) return;
     setLoading(true);
     try {

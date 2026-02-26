@@ -17,7 +17,7 @@ export default defineCollection({
   title: '类别',
   fields: [
     { name: 'id', type: 'bigInt', autoIncrement: true, primaryKey: true, allowNull: false },
-    { name: 'parent_id', type: 'bigInt', defaultValue: 0 },
+    { name: 'parent_id', type: 'bigInt', defaultValue: 0, index: true },
     {
       name: 'name',
       type: 'string',

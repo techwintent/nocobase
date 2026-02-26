@@ -247,7 +247,18 @@ export class DataDiffer {
 
   async diffSalesOrders(row: Record<string, any>): Promise<DiffResult> {
     const batchNo = String(row['批次'] ?? '').trim();
-    const orderNo = batchNo || `SO${Date.now()}`;
+    let orderNo: string;
+    if (batchNo) {
+      orderNo = batchNo;
+    } else {
+      // Build deterministic key from row data to prevent duplicates on re-import
+      const dateStr = String(row['日期'] ?? '').trim();
+      const storeName = String(row['门店'] ?? '').trim();
+      const customerName = String(row['客户'] ?? '').trim();
+      const employeeName = String(row['经办人'] ?? '').trim();
+      const amount = String(row['应收'] ?? row['销售额'] ?? '').trim();
+      orderNo = `SO-${dateStr}-${storeName}-${customerName}-${employeeName}-${amount}`;
+    }
     const uniqueKey = orderNo;
 
     const store = this.maps.stores[row['门店']];

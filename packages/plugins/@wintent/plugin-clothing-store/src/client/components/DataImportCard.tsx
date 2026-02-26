@@ -39,10 +39,11 @@ export function DataImportCard({ onImportComplete, onImportStart }: DataImportCa
     setProgress(null);
     onImportStart?.();
     const results: ImportResult[] = [];
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        setProgress({ current: i + 1, total: files.length, fileName: file.name });
+    const errors: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setProgress({ current: i + 1, total: files.length, fileName: file.name });
+      try {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -55,16 +56,20 @@ export function DataImportCard({ onImportComplete, onImportStart }: DataImportCa
         if (!result.insights) result.insights = [];
         result.fileName = file.name;
         results.push(result);
+      } catch (err: any) {
+        const msg = err?.response?.data?.errors?.[0]?.message || err?.message || '导入失败';
+        errors.push(`${file.name}: ${msg}`);
       }
-      onImportComplete?.(results);
-      message.success(`导入完成，共 ${results.length} 个文件`);
-    } catch (err: any) {
-      const msg = err?.response?.data?.errors?.[0]?.message || err?.message || '导入失败';
-      message.error(msg);
-    } finally {
-      setLoading(false);
-      setProgress(null);
     }
+    onImportComplete?.(results);
+    if (errors.length > 0) {
+      message.error(`${errors.length} 个文件导入失败：${errors.join('；')}`);
+    }
+    if (results.length > 0) {
+      message.success(`导入完成，共 ${results.length} 个文件`);
+    }
+    setLoading(false);
+    setProgress(null);
   };
 
   const clearFiles = () => {
@@ -83,6 +88,11 @@ export function DataImportCard({ onImportComplete, onImportStart }: DataImportCa
           multiple
           fileList={fileList}
           beforeUpload={(file) => {
+            const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+            if (file.size > MAX_FILE_SIZE) {
+              message.error(`文件 ${file.name} 超过 50MB 限制（${(file.size / 1024 / 1024).toFixed(1)}MB）`);
+              return Upload.LIST_IGNORE;
+            }
             setFileList((prev) => [
               ...prev,
               {

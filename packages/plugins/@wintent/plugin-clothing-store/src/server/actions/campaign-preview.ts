@@ -25,7 +25,7 @@ export async function wintentCampaignsPreview(ctx: Context, next: Next) {
     type: body.type ?? 'clear',
     productIds: body.productIds,
     customerSegment: body.customerSegment ?? 'all',
-    limit: body.limit ?? 10,
+    limit: Math.min(body.limit ?? 10, 1000),
   };
   if (!['clear', 'match', 'customer'].includes(params.type)) {
     return ctx.throw(400, 'Invalid campaign type');

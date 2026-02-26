@@ -14,7 +14,7 @@
 
 import { useAPIClient } from '@nocobase/client';
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Card, Col, Row, Table, Typography } from 'antd';
+import { Card, Col, message, Row, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -60,7 +60,7 @@ export function RestockRecommendationPage() {
       const body = (raw?.data ?? raw ?? {}) as { items?: RestockItem[] };
       return body?.items ?? [];
     },
-    { refreshDeps: [productIdParam] },
+    { refreshDeps: [productIdParam], onError: (e: any) => message.error(e?.message || '加载补货推荐失败') },
   );
 
   const items: RestockItem[] = Array.isArray(data) ? data : [];

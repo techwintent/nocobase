@@ -121,7 +121,11 @@ export function CustomerListPage() {
       }
       return body?.customerIds ?? body?.sampleCustomerIds ?? [];
     },
-    { refreshDeps: [isExecutionMode, campaign, segment, productIdsParam], ready: isExecutionMode },
+    {
+      refreshDeps: [isExecutionMode, campaign, segment, productIdsParam],
+      ready: isExecutionMode,
+      onError: (e: any) => message.error(e?.message || '加载活动预览失败'),
+    },
   );
 
   const { data: executionList, loading: executionLoading } = useRequest(
@@ -136,7 +140,11 @@ export function CustomerListPage() {
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { refreshDeps: [executionCustomerIds], ready: (executionCustomerIds?.length ?? 0) > 0 },
+    {
+      refreshDeps: [executionCustomerIds],
+      ready: (executionCustomerIds?.length ?? 0) > 0,
+      onError: (e: any) => message.error(e?.message || '加载活动客户失败'),
+    },
   );
 
   // 客户列表模式
@@ -158,7 +166,11 @@ export function CustomerListPage() {
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { refreshDeps: [isExecutionMode, segmentFilter], ready: !isExecutionMode },
+    {
+      refreshDeps: [isExecutionMode, segmentFilter],
+      ready: !isExecutionMode,
+      onError: (e: any) => message.error(e?.message || '加载客户列表失败'),
+    },
   );
 
   useEffect(() => {

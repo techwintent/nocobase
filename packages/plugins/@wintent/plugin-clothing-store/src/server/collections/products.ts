@@ -88,11 +88,11 @@ export default defineCollection({
     { name: 'price_5', type: 'decimal', precision: 12, scale: 2 },
     { name: 'discount', type: 'decimal', precision: 5, scale: 2 },
     // 分类（外键 + 冗余名称）
-    { name: 'supplier_id', type: 'bigInt' },
+    { name: 'supplier_id', type: 'bigInt', index: true },
     { name: 'supplier_name', type: 'string' },
-    { name: 'brand_id', type: 'bigInt' },
+    { name: 'brand_id', type: 'bigInt', index: true },
     { name: 'brand_name', type: 'string' },
-    { name: 'category_id', type: 'bigInt' },
+    { name: 'category_id', type: 'bigInt', index: true },
     { name: 'category_name', type: 'string' },
     // 属性
     {

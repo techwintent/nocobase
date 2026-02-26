@@ -70,7 +70,7 @@ export async function wintentDataReset(ctx: Context, next: Next) {
   }
 
   const hasError = results.some((r) => !r.ok);
-  ctx.status = hasError ? 500 : 200;
+  ctx.status = 200;
   ctx.body = {
     ok: !hasError,
     tables: results,

@@ -111,7 +111,7 @@ function SingleResultContent({ result }: { result: ImportResult }) {
                     { title: '行号', dataIndex: 'row', key: 'row', width: 80 },
                     { title: '错误原因', dataIndex: 'message', key: 'message' },
                   ]}
-                  rowKey={(r) => `${r.row}-${r.message}`}
+                  rowKey={(r, index) => `error-${index}-${r.row}`}
                   pagination={false}
                   size="small"
                 />
@@ -132,7 +132,7 @@ function SingleResultContent({ result }: { result: ImportResult }) {
                 <Table
                   dataSource={result.changes}
                   columns={changeColumns}
-                  rowKey={(r) => `${r.uniqueKey}-${r.action}`}
+                  rowKey={(r, index) => (r.uniqueKey ? `${r.uniqueKey}-${r.action}` : `change-${index}`)}
                   pagination={false}
                   size="small"
                   expandable={{
@@ -172,7 +172,7 @@ export function ChangeLogCard({ results, loading }: ChangeLogCardProps) {
   const totalErrors = results.reduce((s, r) => s + (r.errors?.length ?? 0), 0);
 
   const collapseItems = results.map((r, idx) => ({
-    key: `file-${idx}`,
+    key: r.fileName ? `file-${r.fileName}` : `file-${idx}`,
     label: `${r.fileName || `文件${idx + 1}`} (${TYPE_LABELS[r.type] ?? r.type})`,
     children: <SingleResultContent result={r} />,
   }));

@@ -19,6 +19,7 @@ import { parseXlsx, type ImportType } from '../services/xlsx-parser';
 import { validateRow } from '../services/validators';
 import { DataDiffer, type DiffResult } from '../services/data-differ';
 import { generateInsights } from '../services/insight-engine';
+import { generateSuggestions } from '../services/suggestion-engine';
 import type { DetailedChange } from '../../shared/types';
 
 /** Build name→spu_code lookup from database at runtime */
@@ -30,6 +31,45 @@ function buildProductNameMap(maps: { products: Record<string, any> }): Record<st
     }
   }
   return nameToCode;
+}
+
+/** Recalculate products.total_stock / total_sold from inventory and sales_items */
+async function updateProductAggregates(db: any) {
+  const productRepo = db.getRepository('products');
+  const inventoryRepo = db.getRepository('inventory');
+  const salesItemsRepo = db.getRepository('sales_items');
+
+  const products = await productRepo.find({ fields: ['id'], limit: 10000 });
+  for (const p of products) {
+    const rec = p.toJSON ? p.toJSON() : p;
+    const pid = rec.id;
+    if (!pid) continue;
+
+    const invRows = await inventoryRepo.find({
+      filter: { product_id: { $eq: pid } },
+      fields: ['quantity'],
+      limit: 5000,
+    });
+    const totalStock = (invRows as any[]).reduce((sum: number, r: any) => {
+      const row = r.toJSON ? r.toJSON() : r;
+      return sum + (Number(row.quantity) || 0);
+    }, 0);
+
+    const salesRows = await salesItemsRepo.find({
+      filter: { product_id: { $eq: pid } },
+      fields: ['quantity'],
+      limit: 20000,
+    });
+    const totalSold = (salesRows as any[]).reduce((sum: number, r: any) => {
+      const row = r.toJSON ? r.toJSON() : r;
+      return sum + (Number(row.quantity) || 0);
+    }, 0);
+
+    await productRepo.update({
+      filter: { id: pid },
+      values: { total_stock: totalStock, total_sold: totalSold },
+    });
+  }
 }
 
 function ensureDir(dir: string) {
@@ -436,7 +476,21 @@ export async function clothingImportUpload(ctx: Context, next: Next) {
     }
   }
 
+  // Recalculate product aggregates after any import type
+  try {
+    await updateProductAggregates(db);
+  } catch (e: any) {
+    console.error('[wintent import] updateProductAggregates failed:', e?.message ?? e);
+  }
+
   const insights = generateInsights(type, result.changes, maps);
+
+  // Generate AI suggestions after import (writes to ai_suggestions table)
+  try {
+    await generateSuggestions(db);
+  } catch (e: any) {
+    console.error('[wintent import] generateSuggestions failed:', e?.message ?? e);
+  }
 
   const ts = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
   const safeName = (ctx.file.originalname || 'import.xlsx').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200);

@@ -14,7 +14,7 @@
 
 import { useAPIClient } from '@nocobase/client';
 import { AppstoreOutlined, ShoppingOutlined, TagOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Card, Col, Input, Row, Select, Space, Table, Tag, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -77,7 +77,7 @@ export function ProductListPage() {
       const raw = res?.data;
       return (raw?.data ?? raw ?? {}) as StatusMap;
     },
-    { manual: false },
+    { manual: false, onError: (e: any) => message.error(e?.message || '加载状态标签失败') },
   );
 
   const { data: listData, loading: listLoading } = useRequest(
@@ -91,7 +91,7 @@ export function ProductListPage() {
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { manual: false },
+    { manual: false, onError: (e: any) => message.error(e?.message || '加载商品列表失败') },
   );
 
   const { data: inventoryList = [], loading: inventoryLoading } = useRequest(
@@ -103,7 +103,7 @@ export function ProductListPage() {
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { manual: false },
+    { manual: false, onError: (e: any) => message.error(e?.message || '加载库存数据失败') },
   );
 
   const statusSet = useMemo(() => {
@@ -333,7 +333,7 @@ const ProductInventoryTable: React.FC<ProductInventoryTableProps> = ({ productId
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { refreshDeps: [productId] },
+    { refreshDeps: [productId], onError: (e: any) => message.error(e?.message || '加载SKU库存失败') },
   );
 
   const columns: ColumnsType<InventoryRecord> = [

@@ -20,12 +20,14 @@ export default defineCollection({
     {
       name: 'main_product_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '主商品ID', 'x-component': 'InputNumber' },
     },
     {
       name: 'match_product_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '搭配商品ID', 'x-component': 'InputNumber' },
     },

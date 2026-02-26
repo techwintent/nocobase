@@ -45,8 +45,8 @@ export default defineCollection({
       interface: 'textarea',
       uiSchema: { type: 'string', title: '描述', 'x-component': 'Input.TextArea' },
     },
-    { name: 'related_product_id', type: 'bigInt' },
-    { name: 'related_customer_id', type: 'bigInt' },
+    { name: 'related_product_id', type: 'bigInt', index: true },
+    { name: 'related_customer_id', type: 'bigInt', index: true },
     { name: 'match_count', type: 'integer', defaultValue: 0 },
     {
       name: 'status',

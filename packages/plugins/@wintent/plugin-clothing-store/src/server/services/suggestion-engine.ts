@@ -17,6 +17,15 @@ import type { Database } from '@nocobase/database';
 import { WINTENT_CONFIG } from '../config';
 
 const SUGGESTION_TYPES = ['restock', 'match', 'customer', 'clear'] as const;
+
+/** Upper-bound limits for suggestion source queries */
+const SUGGESTION_LIMITS = {
+  LOW_STOCK: 100,
+  SLOW_PRODUCTS: 50,
+  SLEEPING_CUSTOMERS: 50,
+  NEW_PRODUCTS: 30,
+  OLD_BATCH_CLEANUP: 5000,
+} as const;
 export type SuggestionType = (typeof SUGGESTION_TYPES)[number];
 
 export interface SuggestionRecord {
@@ -46,7 +55,7 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
   const inventoryRepo = db.getRepository('inventory');
   const lowStock = await inventoryRepo.find({
     filter: { quantity: { $lt: STOCK_THRESHOLD } },
-    limit: 100,
+    limit: SUGGESTION_LIMITS.LOW_STOCK,
   });
   const productIdsRestock = new Set<number>();
   for (const inv of lowStock as any[]) {
@@ -76,7 +85,7 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
     filter: {
       $and: [{ total_stock: { $gt: 0 } }, { total_sold: { $eq: 0 } }],
     },
-    limit: 50,
+    limit: SUGGESTION_LIMITS.SLOW_PRODUCTS,
   });
   for (const p of slowProducts as any[]) {
     if (outOfSizeIds.has(p.id)) continue;
@@ -102,7 +111,7 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
     filter: {
       $and: [{ days_since_last: { $gt: SLEEP_DAYS } }, { days_since_last: { $lte: CHURN_DAYS } }],
     },
-    limit: 50,
+    limit: SUGGESTION_LIMITS.SLEEPING_CUSTOMERS,
   });
   for (const c of sleeping as any[]) {
     records.push({
@@ -120,7 +129,7 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
   const newProductSince = daysAgo(NEW_PRODUCT_DAYS);
   const newProducts = await productsRepo.find({
     filter: { listed_at: { $gte: newProductSince.toISOString().slice(0, 10) } },
-    limit: 30,
+    limit: SUGGESTION_LIMITS.NEW_PRODUCTS,
   });
   for (const p of newProducts as any[]) {
     const name = p.name || p.spu_code || `#${p.id}`;
@@ -135,13 +144,24 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
     });
   }
 
-  // 删除旧 pending 建议（可选：只删本次会再生成的 type，这里简单全删 pending）
-  await repo.destroy({
-    filter: { status: 'pending' },
-  });
-
+  // Atomic-safe: insert new suggestions first, then delete old pending ones.
+  // This prevents data loss if insert fails mid-way.
+  const batchId = `batch-${Date.now()}`;
   for (const r of records) {
-    await repo.create({ values: r });
+    await repo.create({ values: { ...r, ext_json: { batchId } } });
+  }
+
+  // Delete old pending suggestions that are NOT from this batch
+  const oldPending = await repo.find({
+    filter: {
+      $and: [{ status: 'pending' }, { $or: [{ ext_json: { $eq: null } }, { 'ext_json.batchId': { $ne: batchId } }] }],
+    },
+    fields: ['id'],
+    limit: SUGGESTION_LIMITS.OLD_BATCH_CLEANUP,
+  });
+  const oldIds = (oldPending as any[]).map((r: any) => (r.toJSON ? r.toJSON() : r).id).filter(Boolean);
+  if (oldIds.length > 0) {
+    await repo.destroy({ filter: { id: { $in: oldIds } } });
   }
 
   return { count: records.length };

@@ -31,6 +31,7 @@ export default defineCollection({
     {
       name: 'phone',
       type: 'string',
+      unique: true,
       interface: 'phone',
       uiSchema: { type: 'string', title: '手机', 'x-component': 'Input' },
     },
@@ -74,7 +75,7 @@ export default defineCollection({
       },
     },
     // 会员信息
-    { name: 'vip_level_id', type: 'bigInt' },
+    { name: 'vip_level_id', type: 'bigInt', index: true },
     { name: 'vip_level_name', type: 'string' },
     { name: 'paid_member_level', type: 'string' },
     { name: 'member_expire_at', type: 'date' },
@@ -108,8 +109,8 @@ export default defineCollection({
     { name: 'days_since_last', type: 'integer' },
     { name: 'avg_order_amount', type: 'decimal', precision: 12, scale: 2 },
     // 归属
-    { name: 'store_id', type: 'bigInt' },
-    { name: 'employee_id', type: 'bigInt' },
+    { name: 'store_id', type: 'bigInt', index: true },
+    { name: 'employee_id', type: 'bigInt', index: true },
     { name: 'employee_name', type: 'string' },
     // 地址
     { name: 'province', type: 'string' },

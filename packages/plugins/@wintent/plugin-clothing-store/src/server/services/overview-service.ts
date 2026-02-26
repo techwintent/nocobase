@@ -15,6 +15,14 @@
 import type { Database } from '@nocobase/database';
 import { WINTENT_CONFIG } from '../config';
 
+/** Upper-bound limits for batch queries to prevent unbounded fetches */
+const QUERY_LIMITS = {
+  INVENTORY: 10000,
+  ORDERS: 5000,
+  SALES_ITEMS: 20000,
+  PRODUCTS: 5000,
+} as const;
+
 export interface ProductStats {
   total: number;
   outOfSize: number;
@@ -69,7 +77,7 @@ export async function getOverviewStats(db: Database): Promise<OverviewStats> {
     const lowStockRows = await inventoryRepo.find({
       filter: { quantity: { $lt: STOCK_THRESHOLD } },
       fields: ['product_id'],
-      limit: 10000,
+      limit: QUERY_LIMITS.INVENTORY,
     });
     const outOfSizeProductIds = new Set((lowStockRows as any[]).map((r) => r.product_id).filter(Boolean));
     const newCount = await productRepo.count({
@@ -120,7 +128,7 @@ export async function getOverviewStats(db: Database): Promise<OverviewStats> {
     const orders = await salesOrdersRepo.find({
       filter: { order_date: { $gte: trendSince.toISOString().slice(0, 10) } },
       fields: ['id', 'order_date', 'customer_id'],
-      limit: 5000,
+      limit: QUERY_LIMITS.ORDERS,
     });
     const orderIds = (orders as any[]).map((o) => o.id);
     const byDate: Record<string, { salesQty: number; customerIds: Set<number> }> = {};
@@ -138,7 +146,7 @@ export async function getOverviewStats(db: Database): Promise<OverviewStats> {
       const items = await salesItemsRepo.find({
         filter: { order_id: { $in: orderIds } },
         fields: ['order_id', 'quantity'],
-        limit: 20000,
+        limit: QUERY_LIMITS.SALES_ITEMS,
       });
       const orderIdToDate: Record<number, string> = {};
       for (const o of orders as any[]) {
@@ -184,7 +192,7 @@ export async function getProductStatusMap(db: Database): Promise<{
     const lowStockRows = await inventoryRepo.find({
       filter: { quantity: { $lt: STOCK_THRESHOLD } },
       fields: ['product_id'],
-      limit: 5000,
+      limit: QUERY_LIMITS.PRODUCTS,
     });
     const outOfSizeSet = new Set((lowStockRows as any[]).map((r) => r.product_id).filter(Boolean));
     outOfSize.push(...outOfSizeSet);
@@ -192,14 +200,14 @@ export async function getProductStatusMap(db: Database): Promise<{
     const newProducts = await productRepo.find({
       filter: { listed_at: { $gte: newProductSince.toISOString().slice(0, 10) } },
       fields: ['id'],
-      limit: 5000,
+      limit: QUERY_LIMITS.PRODUCTS,
     });
     newIds.push(...(newProducts as any[]).map((p) => p.id).filter(Boolean));
 
     const slowProducts = await productRepo.find({
       filter: { total_stock: { $gt: 0 }, total_sold: { $eq: 0 } },
       fields: ['id'],
-      limit: 5000,
+      limit: QUERY_LIMITS.PRODUCTS,
     });
     slowIds.push(...(slowProducts as any[]).map((p) => p.id).filter(Boolean));
   } catch (e: any) {

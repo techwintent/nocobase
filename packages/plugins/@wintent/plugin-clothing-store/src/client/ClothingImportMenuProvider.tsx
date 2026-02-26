@@ -13,6 +13,7 @@
  */
 
 import { useAPIClient } from '@nocobase/client';
+import { message } from 'antd';
 import React, { useEffect, useRef } from 'react';
 
 const ROUTES_TO_ENSURE: { schemaUid: string; title: string; icon: string }[] = [
@@ -65,7 +66,8 @@ export function ClothingImportMenuProvider({ children }: { children: React.React
           });
         }
         doneRef.current = true;
-        window.location.reload();
+        message.info('菜单已更新，正在刷新页面…');
+        setTimeout(() => window.location.reload(), 500);
       } catch (err) {
         console.warn('[ClothingStore] Failed to ensure menu routes:', err);
       }

@@ -13,7 +13,7 @@
 
 import { useAPIClient } from '@nocobase/client';
 import { DatabaseOutlined } from '@ant-design/icons';
-import { Alert, Card, Col, Input, Row, Space, Switch, Table, Tag, Typography, Button } from 'antd';
+import { Alert, Button, Card, Col, Input, message, Row, Space, Switch, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useMemo, useState } from 'react';
 import { useRequest } from 'ahooks';
@@ -57,7 +57,7 @@ export const InventoryManagePage: React.FC = () => {
       const rows = data?.data ?? data?.rows ?? [];
       return Array.isArray(rows) ? rows : [];
     },
-    { refreshDeps: [onlyLowStock] },
+    { refreshDeps: [onlyLowStock], onError: (e: any) => message.error(e?.message || '加载库存数据失败') },
   );
 
   const groupedData = useMemo<AggregatedRow[]>(() => {

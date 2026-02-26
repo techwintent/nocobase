@@ -22,6 +22,7 @@ export default defineCollection({
     {
       name: 'product_id',
       type: 'bigInt',
+      index: true,
       interface: 'integer',
       uiSchema: { type: 'number', title: '商品ID', 'x-component': 'InputNumber' },
     },

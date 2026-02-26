@@ -77,11 +77,11 @@ export async function generateScript(db: Database, params: ScriptGenerateParams)
       const qty = Number(it.quantity) || 0;
       if (it.color) {
         const key = String(it.color);
-        colorCount.set(key, (colorCount.get(key) || 0) + qty || 1);
+        colorCount.set(key, (colorCount.get(key) || 0) + (qty || 0));
       }
       if (it.size) {
         const key = String(it.size);
-        sizeCount.set(key, (sizeCount.get(key) || 0) + qty || 1);
+        sizeCount.set(key, (sizeCount.get(key) || 0) + (qty || 0));
       }
       if (it.sell_price != null) {
         const price = Number(it.sell_price);
@@ -130,11 +130,11 @@ export async function generateScript(db: Database, params: ScriptGenerateParams)
       if (!meta) continue;
       if (meta.category_name) {
         const key = meta.category_name;
-        categoryCount.set(key, (categoryCount.get(key) || 0) + qty || 1);
+        categoryCount.set(key, (categoryCount.get(key) || 0) + (qty || 0));
       }
       if (meta.style) {
         const key = meta.style;
-        styleCount.set(key, (styleCount.get(key) || 0) + qty || 1);
+        styleCount.set(key, (styleCount.get(key) || 0) + (qty || 0));
       }
     }
   }
