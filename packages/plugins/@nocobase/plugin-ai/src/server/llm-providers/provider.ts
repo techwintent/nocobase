@@ -17,8 +17,10 @@ import { encodeFile, parseResponseMessage, stripToolCallTags } from '../utils';
 import { EmbeddingsInterface } from '@langchain/core/embeddings';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { Context } from '@nocobase/actions';
-import { ToolOptions } from '../manager/tool-manager';
 import { tool } from 'langchain';
+import '@langchain/core/utils/stream';
+import { ToolsEntry } from '@nocobase/ai';
+import { LLMResult } from '@langchain/core/outputs';
 
 export interface LLMProviderOptions {
   app: Application;
@@ -50,7 +52,7 @@ export abstract class LLMProvider {
 
   prepareChain(context: AIChatContext) {
     let chain = this.chatModel;
-    const toolDefinitions = context.tools?.map(ToolDefinition.from('ToolOptions'));
+    const toolDefinitions = context.tools?.map(ToolDefinition.from('ToolsEntry'));
 
     if (this.builtInTools()?.length) {
       const tools = [...this.builtInTools()];
@@ -71,7 +73,7 @@ export abstract class LLMProvider {
     return chain;
   }
 
-  async invokeChat(context: AIChatContext, options?: any) {
+  async invoke(context: AIChatContext, options?: any) {
     const chain = this.prepareChain(context);
     return chain.invoke(context.messages, options);
   }
@@ -177,7 +179,6 @@ export abstract class LLMProvider {
   async testFlight(): Promise<{ status: 'success' | 'error'; code: number; message?: string }> {
     try {
       const result = await this.chatModel.invoke('hello');
-      console.log(result);
     } catch (error) {
       return {
         status: 'error',
@@ -195,12 +196,24 @@ export abstract class LLMProvider {
     return [];
   }
 
-  protected isToolConflict(): boolean {
-    return true;
+  isToolConflict(): boolean {
+    return false;
+  }
+
+  resolveTools(toolDefinitions: any[]): any[] {
+    const builtIn = this.builtInTools();
+    if (builtIn.length > 0 && toolDefinitions.length > 0 && this.isToolConflict()) {
+      return [...builtIn];
+    }
+    return [...builtIn, ...toolDefinitions];
   }
 
   parseWebSearchAction(chunk: AIMessageChunk): { type: string; query: string }[] {
     return [];
+  }
+
+  parseResponseMetadata(output: LLMResult): any {
+    return [null, null];
   }
 }
 
@@ -248,12 +261,12 @@ export abstract class EmbeddingProvider {
   }
 }
 
-type FromType = 'ToolOptions';
+type FromType = 'ToolsEntry';
 
-class ToolDefinition {
+export class ToolDefinition<T> {
   constructor(
     private from: FromType,
-    private _tool: any,
+    private _tool: T,
   ) {}
 
   static from(from: FromType) {
@@ -261,7 +274,7 @@ class ToolDefinition {
   }
 
   get tool() {
-    if (this.from === 'ToolOptions') {
+    if (this.from === 'ToolsEntry') {
       return this.convertToolOptions();
     } else {
       throw new Error('not supported tool definitions');
@@ -269,12 +282,15 @@ class ToolDefinition {
   }
 
   private convertToolOptions() {
-    const { invoke, name, description, schema, returnDirect = false } = this._tool as ToolOptions;
+    const {
+      invoke,
+      definition: { name, description, schema },
+    } = this._tool as ToolsEntry;
     return tool((input, { toolCall, context }) => invoke(context.ctx, input, toolCall.id), {
       name,
       description,
       schema,
-      returnDirect: returnDirect as boolean,
+      returnDirect: false,
     });
   }
 }

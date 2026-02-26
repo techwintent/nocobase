@@ -101,6 +101,11 @@
           },
           {
             "type": "custom-link",
+            "label": "数据加载方式",
+            "link": "/interface-builder/blocks/block-settings/data-loading-method"
+          },
+          {
+            "type": "custom-link",
             "label": "布局",
             "link": "/interface-builder/blocks/block-settings/block-layout"
           },
@@ -118,6 +123,11 @@
             "type": "custom-link",
             "label": "排序规则",
             "link": "/interface-builder/blocks/block-settings/sorting-rule"
+          },
+          {
+            "type": "custom-link",
+            "label": "拖拽排序",
+            "link": "/interface-builder/blocks/block-settings/drag-sort"
           },
           {
             "type": "custom-link",
@@ -143,7 +153,6 @@
       }
     ]
   },
-
   {
     "type": "custom-link",
     "label": "字段",
@@ -217,8 +226,13 @@
           },
           {
             "type": "custom-link",
-            "label": "子表格",
+            "label": "子表格（行内编辑）",
             "link": "/interface-builder/fields/specific/sub-table"
+          },
+          {
+            "type": "custom-link",
+            "label": "子表格（弹窗编辑）",
+            "link": "/interface-builder/fields/specific/sub-table-popup"
           },
           {
             "type": "custom-link",
@@ -456,6 +470,11 @@
             "type": "custom-link",
             "label": "批量更新",
             "link": "/interface-builder/actions/types/bulk-update"
+          },
+          {
+            "type": "custom-link",
+            "label": "批量编辑",
+            "link": "/interface-builder/actions/types/bulk-edit"
           },
           {
             "type": "custom-link",
