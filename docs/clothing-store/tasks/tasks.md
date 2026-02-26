@@ -120,11 +120,11 @@
     - 生成执行脚本 create-tables.sh
     - _Output: scripts/collections.json, scripts/create-tables.sh_
 
-  - [ ] 1.3 执行建表并验证
-    - ⚡ **Sonnet 4** | _Depends: 1.2_
-    - 调用 NocoBase API 创建表结构
+  - [x] 1.3 执行建表并验证
+    - ⚡ **Sonnet 4** | ✅ 已完成 2026-02-25
+    - 调用 NocoBase API 创建表结构（run-create-tables-and-validate.js）
     - 验证字段类型、关联关系正确
-    - _Output: validation-log-v0.1.md_
+    - _Output: [validation-log-v0.1.md](../validation-log-v0.1.md)_
 
   - [ ]* 1.4 **Checkpoint** - 南瓜验收：数据导入测试
     - 🍊 **南瓜** + 👤 **Damer** | _Depends: 1.3, 0.5_
@@ -135,34 +135,28 @@
 
 - [ ] 2. Phase 2: AI中心模块
 
-  - [ ] 2.1 经营概览设计
-    - 🤖 **Opus** | _Depends: 1.4 通过_
+  - [x] 2.1 经营概览设计
+    - 🤖 **Opus** | ✅ 已完成 2026-02-25
     - 设计商品统计（总数/断码/新品/滞销）
     - 设计客户统计（总数/活跃/沉睡/流失）
     - 设计趋势图展示
-    - _Requirements: AI中心作为首页核心模块_
-    - _Output: business-overview-design.md_
+    - _Output: [business-overview-design.md](../design/business-overview-design.md)_
 
-  - [ ] 2.2 AI建议系统
-    - ⚡ **Sonnet 4** | _Depends: 2.1_
-    - 实现4种建议类型（促销/推荐/回访/补货）
-    - 建议与模块的联动跳转（跳转到库存模块/客户模块）
-    - 基于数据分析生成智能建议
-    - **触发机制**：
-      - ⏰ 定时任务（每日 00:00）：全量刷新所有建议 + 客户状态更新
-      - 📦 库存变更（inventory 表）：实时检查库存 → 补货/促销建议
-      - 💰 销售出库（sale_items 表）：实时检查库存 → 补货建议
-      - 🧾 销售订单（sales 表）：更新客户活跃度 → 清理回访建议
-      - 🏷️ 商品状态变更：断码/滞销 → 促销建议
-    - **配置参数**：库存阈值5件、沉睡30天、流失60天、新品期7天
-    - _Output: wintent-plugin.ts（NocoBase 插件）_
+  - [x] 2.2 AI建议系统
+    - ⚡ **Sonnet 4** | ✅ 已完成 2026-02-25
+    - 实现4种建议类型（restock/补货、match/推荐、customer/回访、clear/促销）
+    - 建议与模块的联动跳转（前端「去处理/去回访」占位，后续对接库存/客户模块）
+    - 基于规则引擎生成智能建议，写入 ai_suggestions
+    - **触发机制**：已实现手动刷新（wintentSuggestions:refresh）；定时/事件触发可后续接入
+    - **配置参数**：见 [config.ts](../../packages/plugins/@wintent/plugin-clothing-store/src/server/config.ts)（库存阈值5、沉睡30天、流失60天、新品期7天）
+    - _Output: 插件内 overview-stats、suggestions-refresh、suggestion-engine、overview-service_
 
-  - [ ] 2.3 数据导入界面
-    - 👤 **Damer** | _Depends: 2.1_
+  - [x] 2.3 数据导入界面
+    - 👤 **Damer** | ✅ 已完成（数据工作台已含导入+进度+变更摘要+AI洞察）
     - 集成 Phase 0 的导入功能
-    - 模拟导入流程和进度展示
-    - 导入后数据统计展示
-    - _Output: AI中心数据导入界面_
+    - 导入流程和进度展示
+    - 导入后变更摘要与数据统计展示
+    - _Output: 数据工作台（经营概览+数据输入+变更摘要+AI洞察+AI智能建议）_
 
   - [ ]* 2.4 **Checkpoint** - 南瓜验收：AI中心功能
     - 🍊 **南瓜** + 🤖 **Opus** | _Depends: 2.2, 2.3_

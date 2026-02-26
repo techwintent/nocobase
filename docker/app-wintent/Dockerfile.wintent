@@ -16,7 +16,7 @@ RUN yarn config set network-timeout 600000 -g && \
     yarn install --production=false
 
 # 编译 Wintent 插件
-RUN yarn build @wintent/plugin-config --no-dts
+RUN yarn build @wintent/plugin-config @wintent/plugin-clothing-store --no-dts
 
 # 编译核心客户端（包含 Wintent 样式修改）
 RUN yarn build @nocobase/client --no-dts

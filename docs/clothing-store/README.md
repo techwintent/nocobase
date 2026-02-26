@@ -45,9 +45,21 @@ AI建议"库存不足" → 点击 → 库存模块（补货详情 + 搭配推荐
 - [`tasks/`](tasks/) - 任务计划（Phase 0-6 开发计划）
 - [`scripts/`](scripts/) - 建表脚本和工具
 
-## 快速开始
+## Phase 1 快速开始
 
-查看 [tasks/tasks.md](tasks/tasks.md) 了解完整的开发计划和 Phase 划分。
+1. **种子数据**：已按 商陆花 表头生成
+   - `scripts/seed/` - JSON 源数据（商品 10 款、库存 21 条、客户 10 人、销售单 9 单）
+   - 运行 `node docs/clothing-store/scripts/generate-seed-xlsx.js` 生成 xlsx
+
+2. **建表**：`scripts/create-tables.sh` 通过 NocoBase API 创建 14 张表
+
+3. **导入**：使用生成的 xlsx 通过 NocoBase 数据导入功能导入
+
+详见 [scripts/README.md](scripts/README.md)。
+
+## 完整开发计划
+
+查看 [tasks/tasks.md](tasks/tasks.md) 了解 Phase 0-6 完整开发计划。
 
 ## 技术栈
 

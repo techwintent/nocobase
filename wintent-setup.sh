@@ -89,10 +89,10 @@ yarn install
 echo -e "${GREEN}✓ 依赖安装完成${NC}"
 
 echo ""
-echo "步骤 5: 编译 Wintent 配置插件..."
+echo "步骤 5: 编译 Wintent 插件..."
 echo "----------------------------------------"
 
-yarn build @wintent/plugin-config --no-dts
+yarn build @wintent/plugin-config @wintent/plugin-clothing-store --no-dts
 echo -e "${GREEN}✓ 插件编译完成${NC}"
 
 echo ""

@@ -223,6 +223,11 @@ export async function buildServerDeps(cwd: string, serverFiles: string[], log: P
       }
     }
 
+    // remove existing output dir to avoid EEXIST when copying symlinks (e.g. .bin)
+    if (fs.existsSync(outputDir)) {
+      fs.removeSync(outputDir);
+    }
+
     // copy package
     await fs.copy(depDir, outputDir, { errorOnExist: false });
 
