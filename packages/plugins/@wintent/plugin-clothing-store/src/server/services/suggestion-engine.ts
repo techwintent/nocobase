@@ -24,7 +24,6 @@ const SUGGESTION_LIMITS = {
   SLOW_PRODUCTS: 50,
   SLEEPING_CUSTOMERS: 50,
   NEW_PRODUCTS: 30,
-  OLD_BATCH_CLEANUP: 5000,
 } as const;
 export type SuggestionType = (typeof SUGGESTION_TYPES)[number];
 
@@ -144,24 +143,10 @@ export async function generateSuggestions(db: Database): Promise<{ count: number
     });
   }
 
-  // Atomic-safe: insert new suggestions first, then delete old pending ones.
-  // This prevents data loss if insert fails mid-way.
-  const batchId = `batch-${Date.now()}`;
+  // Delete all pending suggestions first, then insert fresh ones (idempotent refresh)
+  await repo.destroy({ filter: { status: 'pending' } });
   for (const r of records) {
-    await repo.create({ values: { ...r, ext_json: { batchId } } });
-  }
-
-  // Delete old pending suggestions that are NOT from this batch
-  const oldPending = await repo.find({
-    filter: {
-      $and: [{ status: 'pending' }, { $or: [{ ext_json: { $eq: null } }, { 'ext_json.batchId': { $ne: batchId } }] }],
-    },
-    fields: ['id'],
-    limit: SUGGESTION_LIMITS.OLD_BATCH_CLEANUP,
-  });
-  const oldIds = (oldPending as any[]).map((r: any) => (r.toJSON ? r.toJSON() : r).id).filter(Boolean);
-  if (oldIds.length > 0) {
-    await repo.destroy({ filter: { id: { $in: oldIds } } });
+    await repo.create({ values: r });
   }
 
   return { count: records.length };

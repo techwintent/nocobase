@@ -22,6 +22,16 @@ export interface DataImportCardProps {
   onImportStart?: () => void;
 }
 
+/** Detect import type priority from filename for auto-ordering */
+function detectImportTypePriority(name: string): number {
+  const lower = name.toLowerCase();
+  if (/商品|产品|product/.test(lower)) return 0;
+  if (/库存|inventory/.test(lower)) return 1;
+  if (/客户|会员|customer/.test(lower)) return 2;
+  if (/销售|订单|sales|order/.test(lower)) return 3;
+  return 4;
+}
+
 export function DataImportCard({ onImportComplete, onImportStart }: DataImportCardProps) {
   const api = useAPIClient();
   const [fileList, setFileList] = useState<any[]>([]);
@@ -30,6 +40,8 @@ export function DataImportCard({ onImportComplete, onImportStart }: DataImportCa
 
   const handleUpload = async () => {
     const files = fileList.map((f) => f.originFileObj).filter(Boolean);
+    // Sort by import type: products → inventory → customers → sales_orders → unknown
+    files.sort((a, b) => detectImportTypePriority(a.name) - detectImportTypePriority(b.name));
     if (!files.length) {
       message.warning('请先选择 xlsx 文件');
       return;

@@ -16,6 +16,9 @@ import { useAPIClient } from '@nocobase/client';
 import { message } from 'antd';
 import React, { useEffect, useRef } from 'react';
 
+// Versioned key: bump version when ROUTES_TO_ENSURE changes
+const MENU_SETUP_KEY = '@wintent/clothing-store/menu-setup-v1';
+
 const ROUTES_TO_ENSURE: { schemaUid: string; title: string; icon: string }[] = [
   { schemaUid: 'data-studio', title: '数据工作台', icon: 'DashboardOutlined' },
   { schemaUid: 'product-list', title: '商品列表', icon: 'AppstoreOutlined' },
@@ -41,6 +44,11 @@ export function ClothingImportMenuProvider({ children }: { children: React.React
   useEffect(() => {
     if (doneRef.current) return;
     if (!window.location.pathname.startsWith('/admin')) return;
+    // Skip if already set up in a previous session (avoids repeated API calls on every page refresh)
+    if (localStorage.getItem(MENU_SETUP_KEY) === 'done') {
+      doneRef.current = true;
+      return;
+    }
 
     (async () => {
       try {
@@ -51,6 +59,7 @@ export function ClothingImportMenuProvider({ children }: { children: React.React
         const routes = data?.data || [];
         const missing = ROUTES_TO_ENSURE.filter((r) => !findSchemaUidInRoutes(routes, r.schemaUid));
         if (missing.length === 0) {
+          localStorage.setItem(MENU_SETUP_KEY, 'done');
           doneRef.current = true;
           return;
         }
@@ -65,6 +74,7 @@ export function ClothingImportMenuProvider({ children }: { children: React.React
             },
           });
         }
+        localStorage.setItem(MENU_SETUP_KEY, 'done');
         doneRef.current = true;
         message.info('菜单已更新，正在刷新页面…');
         setTimeout(() => window.location.reload(), 500);

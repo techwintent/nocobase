@@ -46,7 +46,7 @@ export function SuggestionListCard() {
     try {
       const { data } = await api.resource('ai_suggestions').list({
         pageSize: 50,
-        sort: ['-createdAt'],
+        sort: ['-id'],
         filter: { status: 'pending' },
       });
       const rows = data?.data ?? data ?? [];

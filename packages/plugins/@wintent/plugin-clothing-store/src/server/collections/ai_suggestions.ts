@@ -65,5 +65,9 @@ export default defineCollection({
       },
     },
     { name: 'priority', type: 'integer', defaultValue: 0 },
+    { name: 'content', type: 'text' },
+    { name: 'target_id', type: 'bigInt', index: true },
+    { name: 'target_type', type: 'string' },
+    { name: 'confidence', type: 'float', defaultValue: 0 },
   ],
 });
