@@ -16,6 +16,7 @@ import { CustomerListPage } from './pages/CustomerListPage';
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { InventoryManagePage } from './pages/InventoryManagePage';
 import { ClothingImportMenuProvider } from './ClothingImportMenuProvider';
+import { ChatPage } from './pages/ChatPage';
 
 export class PluginClothingStoreClient extends Plugin {
   async afterAdd() {}
@@ -24,6 +25,12 @@ export class PluginClothingStoreClient extends Plugin {
 
   async load() {
     this.app.use(ClothingImportMenuProvider);
+
+    // Standalone H5 chat page (outside admin layout, requires login)
+    this.router.add('chat', {
+      path: '/chat',
+      Component: ChatPage,
+    });
 
     this.router.add('admin.data-studio', {
       path: '/admin/data-studio',

@@ -17,6 +17,7 @@ import { wintentRestockRecommendations } from './actions/restock-recommendations
 import { wintentScriptGenerate } from './actions/script-generate';
 import { wintentDataReset } from './actions/data-reset';
 import { clothingImportUploadMiddleware } from './middleware/upload';
+import { createClothingStoreTools } from './tools/clothing-store-tools';
 
 export class PluginClothingStoreServer extends Plugin {
   async afterAdd() {}
@@ -24,6 +25,24 @@ export class PluginClothingStoreServer extends Plugin {
   async beforeLoad() {}
 
   async load() {
+    // Register AI tools for clothing store
+    try {
+      console.log('[plugin-clothing-store] this.ai:', !!this.ai);
+      console.log('[plugin-clothing-store] this.ai?.toolsManager:', !!this.ai?.toolsManager);
+      const toolsManager = this.ai?.toolsManager;
+      if (toolsManager) {
+        const tools = createClothingStoreTools();
+        console.log('[plugin-clothing-store] Registering', tools.length, 'AI tools:', tools.map((t) => t.definition.name));
+        toolsManager.registerTools(tools);
+        // Verify registration
+        const registered = await toolsManager.listTools();
+        console.log('[plugin-clothing-store] Total registered tools:', registered.length, registered.map((t) => `${t.definition.name}(${t.scope})`));
+      } else {
+        console.warn('[plugin-clothing-store] toolsManager not available, skipping AI tools registration');
+      }
+    } catch (e) {
+      console.error('[plugin-clothing-store] AI tools registration FAILED:', e);
+    }
     this.app.dataSourceManager.afterAddDataSource((dataSource) => {
       dataSource.resourceManager.use(clothingImportUploadMiddleware);
       dataSource.resourceManager.define({
