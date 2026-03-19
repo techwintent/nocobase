@@ -14,6 +14,9 @@ import fse from 'fs-extra';
 import path from 'path';
 import Application from '../../application';
 import PluginManager from '../plugin-manager';
+import crypto from 'crypto';
+
+import packageJson from '../../../package.json';
 
 class PackageUrls {
   static items = {};
@@ -33,7 +36,24 @@ class PackageUrls {
       const distExists = await fse.exists(dist);
       if (distExists) {
         const fsState = await fse.stat(distExists ? dist : pkgPath);
-        t = `?t=${fsState.mtime.getTime()}`;
+        const appKey = process.env.APP_KEY || '';
+        let version = '';
+        try {
+          const pkgJson = await fse.readJson(path.resolve(pkgPath, 'package.json'));
+          if (pkgJson && typeof pkgJson.version === 'string') {
+            version = pkgJson.version;
+          }
+        } catch (error) {
+          // Ignore errors reading package.json and fall back to empty version
+        }
+        const appVersion = packageJson.version;
+        const salt = process.env.PLUGIN_URL_HASH_SALT || '';
+        const hash = crypto
+          .createHash('sha256')
+          .update(fsState.mtime.getTime() + appKey + version + appVersion + salt)
+          .digest('hex')
+          .slice(0, 8);
+        t = `?hash=${hash}`;
       }
       const cdnBaseUrl = process.env.CDN_BASE_URL.replace(/\/+$/, '');
       const url = `${cdnBaseUrl}${'/static/plugins/'}${packageName}/${PLUGIN_CLIENT_ENTRY_FILE}${t}`;

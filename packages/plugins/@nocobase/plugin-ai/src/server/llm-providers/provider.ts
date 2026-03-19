@@ -21,6 +21,12 @@ import { tool } from 'langchain';
 import '@langchain/core/utils/stream';
 import { ToolsEntry } from '@nocobase/ai';
 import { LLMResult } from '@langchain/core/outputs';
+import { ContentBlock } from '@langchain/core/messages';
+
+export type ParsedAttachmentResult = {
+  placement: string;
+  content: any;
+};
 
 export interface LLMProviderOptions {
   app: Application;
@@ -129,23 +135,32 @@ export abstract class LLMProvider {
     return stripToolCallTags(chunk);
   }
 
-  async parseAttachment(ctx: Context, attachment: any): Promise<any> {
+  async parseAttachment(ctx: Context, attachment: any): Promise<ParsedAttachmentResult> {
     const fileManager = this.app.pm.get('file-manager') as PluginFileManagerServer;
     const url = await fileManager.getFileURL(attachment);
     const data = await encodeFile(ctx, decodeURIComponent(url));
     if (attachment.mimetype.startsWith('image/')) {
       return {
-        type: 'image_url',
-        image_url: {
-          url: `data:image/${attachment.mimetype.split('/')[1]};base64,${data}`,
+        placement: 'contentBlocks',
+        content: {
+          type: 'image_url',
+          image_url: {
+            url: `data:image/${attachment.mimetype.split('/')[1]};base64,${data}`,
+          },
         },
-      };
+      } as ParsedAttachmentResult;
     } else {
       return {
-        type: 'input_file',
-        filename: attachment.filename,
-        file_data: data,
-      };
+        placement: 'contentBlocks',
+        content: {
+          type: 'file',
+          mimeType: attachment.mimetype,
+          metadata: {
+            filename: attachment.filename,
+          },
+          data,
+        } as ContentBlock.Multimodal.File,
+      } as ParsedAttachmentResult;
     }
   }
 
@@ -176,6 +191,7 @@ export abstract class LLMProvider {
       options,
     };
   }
+
   async testFlight(): Promise<{ status: 'success' | 'error'; code: number; message?: string }> {
     try {
       const result = await this.chatModel.invoke('hello');
@@ -212,8 +228,16 @@ export abstract class LLMProvider {
     return [];
   }
 
+  parseReasoningContent(chunk: AIMessageChunk): { status: string; content: string } {
+    return null;
+  }
+
   parseResponseMetadata(output: LLMResult): any {
     return [null, null];
+  }
+
+  parseResponseError(err) {
+    return err?.message ?? 'Unexpected LLM service error';
   }
 }
 
@@ -244,12 +268,12 @@ export abstract class EmbeddingProvider {
     return apiKey;
   }
 
-  protected get baseUrl() {
-    const baseUrl = this.serviceOptions?.baseUrl ?? this.getDefaultUrl();
-    if (!baseUrl) {
-      throw new Error('baseUrl is required');
+  protected get baseURL() {
+    const baseURL = this.serviceOptions?.baseURL ?? this.getDefaultUrl();
+    if (!baseURL) {
+      throw new Error('baseURL is required');
     }
-    return baseUrl;
+    return baseURL;
   }
 
   protected get model() {

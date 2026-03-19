@@ -22,9 +22,12 @@ import {
   FlowStep,
   FlowStepContext,
   isBeforeRenderFlow,
+  FlowRuntimeContext,
+  setupRuntimeContextSteps,
   observer,
   GLOBAL_EMBED_CONTAINER_ID,
   EMBED_REPLACING_DATA_KEY,
+  shouldHideEventInSettings,
 } from '@nocobase/flow-engine';
 import { Collapse, Input, Button, Space, Tooltip, Empty, Dropdown, Select } from 'antd';
 import { uid } from '@formily/shared';
@@ -191,6 +194,7 @@ const EventConfigSection = observer(
     const ctx = useFlowContext<FlowEngineContext>();
     const t = model.translate.bind(model);
     const refresh = useUpdate();
+    const [eventOptions, setEventOptions] = React.useState<Array<{ label: string; value: string }>>([]);
 
     const eventName = getFlowOnEventName(flow.on);
     const onObj = isFlowOnObject(flow.on) ? flow.on : undefined;
@@ -209,6 +213,33 @@ const EventConfigSection = observer(
     const phaseValue: FlowEventPhase = onObj?.phase ? (String(onObj.phase) as FlowEventPhase) : 'beforeAllFlows';
     const flowKeyValue = onObj?.flowKey ? String(onObj.flowKey) : undefined;
     const stepKeyValue = onObj?.stepKey ? String(onObj.stepKey) : undefined;
+    const registeredEvents = React.useMemo(() => [...model.getEvents().values()], [model]);
+
+    React.useEffect(() => {
+      let canceled = false;
+
+      const updateEventOptions = async () => {
+        const nextOptions: Array<{ label: string; value: string }> = [];
+
+        for (const event of registeredEvents) {
+          const hidden = await shouldHideEventInSettings(model, flow, event);
+          if (hidden) continue;
+          nextOptions.push({
+            label: model.translate(event.title),
+            value: event.name,
+          });
+        }
+
+        if (canceled) return;
+        setEventOptions((prev) => (_.isEqual(prev, nextOptions) ? prev : nextOptions));
+      };
+
+      void updateEventOptions();
+
+      return () => {
+        canceled = true;
+      };
+    }, [flow, model, registeredEvents]);
 
     const staticFlows = React.useMemo(() => {
       if (!eventName) return [];
@@ -299,7 +330,7 @@ const EventConfigSection = observer(
               onChange={(value) => {
                 setEventName(value);
               }}
-              options={[...model.getEvents().values()].map((event) => ({ label: t(event.title), value: event.name }))}
+              options={eventOptions}
             />
           </div>
 
@@ -664,7 +695,51 @@ const DynamicFlowsEditor = observer((props: { model: FlowModel }) => {
               setSubmitLoading(false);
               return;
             }
-            await model.flowRegistry.save();
+            try {
+              const afterSaves: Array<() => Promise<void>> = [];
+
+              for (const flow of model.flowRegistry.mapFlows((it) => it)) {
+                for (const step of flow.mapSteps((it) => it)) {
+                  const serialized = step.serialize();
+                  const actionDef = step.use ? model.getAction(step.use) : undefined;
+
+                  const beforeParamsSave = serialized.beforeParamsSave || actionDef?.beforeParamsSave;
+                  const afterParamsSave = serialized.afterParamsSave || actionDef?.afterParamsSave;
+
+                  if (typeof beforeParamsSave !== 'function' && typeof afterParamsSave !== 'function') {
+                    continue;
+                  }
+
+                  const runtimeCtx = new FlowRuntimeContext(model, flow.key, 'settings');
+                  setupRuntimeContextSteps(runtimeCtx, flow.steps, model, flow.key);
+                  runtimeCtx.defineProperty('currentStep', { value: serialized });
+
+                  const currentValues = { ...(step.defaultParams || {}) };
+                  const previousParams = { ...(step.defaultParams || {}) };
+
+                  if (typeof beforeParamsSave === 'function') {
+                    await beforeParamsSave(runtimeCtx as any, currentValues, previousParams);
+                  }
+
+                  if (typeof afterParamsSave === 'function') {
+                    afterSaves.push(async () => {
+                      await afterParamsSave(runtimeCtx as any, currentValues, previousParams);
+                    });
+                  }
+
+                  step.defaultParams = currentValues;
+                }
+              }
+
+              await model.flowRegistry.save();
+
+              for (const runAfterSave of afterSaves) {
+                await runAfterSave();
+              }
+            } catch (error) {
+              model.context?.message?.error?.('Steps post-save hooks failed to run');
+              console.error(error);
+            }
             // 保存事件流定义后，失效 beforeRender 缓存并触发一次重跑，确保改动立刻生效
             const beforeRenderFlows = model.flowRegistry
               .mapFlows((flow) => {

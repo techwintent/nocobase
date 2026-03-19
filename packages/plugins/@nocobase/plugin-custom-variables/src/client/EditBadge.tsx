@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { SchemaSettingsModalItem } from '@nocobase/client';
 import { NAMESPACE } from '../locale';
 
-const BadgeCountInput: FC<any> = (props) => {
+const BadgeVariableTextArea = (props) => {
   const variables = useVariableOptions({} as any);
   return <Variable.TextArea {...props} scope={variables} />;
 };
@@ -35,7 +35,7 @@ const EditBadge: FC = () => {
           'x-decorator-props': {
             tooltip: t('You can enter numbers, text, variables, aggregation variables, expressions, etc.'),
           },
-          'x-component': BadgeCountInput,
+          'x-component': BadgeVariableTextArea,
           description: (
             <span>
               {t('Syntax references: ')}

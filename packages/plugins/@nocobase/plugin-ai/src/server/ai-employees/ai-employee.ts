@@ -152,7 +152,7 @@ export class AIEmployee {
       userDecisions,
       tools,
       middleware,
-      getSystemPrompt: () => this.getSystemPrompt(),
+      getSystemPrompt: (userMessages) => this.getSystemPrompt(userMessages),
       formatMessages: (messages) => this.formatMessages({ messages, provider }),
     });
 
@@ -371,6 +371,7 @@ export class AIEmployee {
     let toolCalls: AIToolCall[];
     const { signal, providerName, model, provider, responseMetadata, allowEmpty = false } = options;
 
+    let isReasoning = false;
     let gathered: any;
     signal.addEventListener('abort', async () => {
       if (gathered?.type === 'ai') {
@@ -401,6 +402,10 @@ export class AIEmployee {
           if (chunk.type === 'ai') {
             gathered = gathered !== undefined ? concat(gathered, chunk) : chunk;
             if (chunk.content) {
+              if (isReasoning) {
+                isReasoning = false;
+                this.protocol.stopReasoning();
+              }
               const parsedContent = provider.parseResponseChunk(chunk.content);
               if (parsedContent) {
                 this.protocol.content(parsedContent);
@@ -414,6 +419,12 @@ export class AIEmployee {
             const webSearch = provider.parseWebSearchAction(chunk);
             if (webSearch?.length) {
               this.protocol.webSearch(webSearch);
+            }
+
+            const reasoningContent = provider.parseReasoningContent(chunk);
+            if (reasoningContent) {
+              isReasoning = true;
+              this.protocol.reasoning(reasoningContent);
             }
           }
         } else if (mode === 'updates') {
@@ -535,7 +546,7 @@ export class AIEmployee {
       if (err.name === 'GraphRecursionError') {
         this.sendSpecificError({ name: err.name, message: err.message });
       } else {
-        this.sendErrorResponse(err.message);
+        this.sendErrorResponse(provider.parseResponseError(err));
       }
     } finally {
       this.ctx.res.end();
@@ -594,7 +605,7 @@ export class AIEmployee {
     return message;
   }
 
-  async getSystemPrompt() {
+  async getSystemPrompt(userMessages: AIMessageInput[]) {
     const userConfig = await this.db.getRepository('usersAiEmployees').findOne({
       filter: {
         userId: this.ctx.auth?.user.id,
@@ -602,7 +613,7 @@ export class AIEmployee {
       },
     });
 
-    let systemMessage = await parseVariables(this.ctx, this.employee.about ?? this.employee.defaultPrompt);
+    let systemMessage = await parseVariables(this.ctx, this.employee.about ?? this.employee.defaultPrompt ?? '');
     const dataSourceMessage = this.getEmployeeDataSourceContext();
     if (dataSourceMessage) {
       systemMessage = `${systemMessage}\n${dataSourceMessage}`;
@@ -620,16 +631,18 @@ export class AIEmployee {
     }
 
     let knowledgeBase;
-    if (this.isEnabledKnowledgeBase() && this.employee.knowledgeBasePrompt) {
-      const lastUserMessage = await this.aiChatConversation.lastUserMessage();
-      const docs = await this.retrieveKnowledgeBase(lastUserMessage);
-      const knowledgeBaseData = docs.map((x) => x.content).join('\n');
-      const promptTemplate = ChatPromptTemplate.fromTemplate(this.employee.knowledgeBasePrompt);
-      knowledgeBase = _.isEmpty(knowledgeBaseData)
-        ? undefined
-        : await promptTemplate.format({
-            knowledgeBaseData,
-          });
+    if (this.isEnabledKnowledgeBase() && this.employee.knowledgeBasePrompt && userMessages?.length) {
+      const lastUserMessage = userMessages.filter((x) => x.role === 'user').at(-1);
+      if (lastUserMessage) {
+        const docs = await this.retrieveKnowledgeBase(lastUserMessage);
+        const knowledgeBaseData = docs.map((x) => x.content).join('\n');
+        const promptTemplate = ChatPromptTemplate.fromTemplate(this.employee.knowledgeBasePrompt);
+        knowledgeBase = _.isEmpty(knowledgeBaseData)
+          ? undefined
+          : await promptTemplate.format({
+              knowledgeBaseData,
+            });
+      }
     }
 
     const systemPrompt = getSystemPrompt({
@@ -660,7 +673,7 @@ If information is missing, clearly state it in the summary.</Important>`;
     }
   }
 
-  async retrieveKnowledgeBase(userMessage: AIMessage): Promise<DocumentSegmentedWithScore[]> {
+  async retrieveKnowledgeBase(userMessage: AIMessageInput): Promise<DocumentSegmentedWithScore[]> {
     const vectorStoreProvider = this.plugin.features.vectorStoreProvider;
     let queryResult: DocumentSegmentedWithScore[] = [];
     const queryString: string = userMessage.content.content as string;
@@ -928,71 +941,62 @@ If information is missing, clearly state it in the summary.</Important>`;
     } else {
       return;
     }
-    const toolCalls: AIToolMessage[] = await this.aiToolMessagesRepo.find({
-      filter: {
-        messageId,
-        invokeStatus: {
-          $ne: 'confirmed',
+    const toolMessages: AIToolMessage[] = (
+      await this.aiToolMessagesModel.findAll<Model<AIToolMessage>>({
+        where: {
+          sessionId: this.sessionId,
+          messageId,
+          invokeStatus: {
+            [Op.ne]: 'confirmed',
+          },
         },
-      },
-    });
-    if (!toolCalls || _.isEmpty(toolCalls)) {
+      })
+    ).map((it) => it.toJSON());
+    if (!toolMessages || _.isEmpty(toolMessages)) {
       return;
     }
 
     const { model, service } = await this.getLLMService();
     const toolCallMap = await this.getToolCallMap(messageId);
     const now = new Date();
-    const toolMessageContent = 'The user rejected this tool invocation and needs to continue modifying the parameters.';
-    await this.db.sequelize.transaction(async (transaction) => {
-      for (const toolCall of toolCalls) {
-        const [updated] = await this.aiToolMessagesModel.update(
+    const toolMessageContent = 'The user ignored the application for tools usage and will continued to ask questions';
+    return await this.db.sequelize.transaction(async (transaction) => {
+      for (const toolMessage of toolMessages) {
+        await this.aiToolMessagesModel.update(
           {
-            invokeStatus: 'done',
-            status: 'error',
+            invokeStatus: 'confirmed',
+            status: 'success',
             content: toolMessageContent,
-            invokeStartTime: toolCall.invokeStartTime ?? now,
-            invokeEndTime: toolCall.invokeEndTime ?? now,
+            invokeStartTime: toolMessage.invokeStartTime ?? now,
+            invokeEndTime: toolMessage.invokeEndTime ?? now,
           },
           {
             where: {
-              id: toolCall.id,
-              invokeStatus: toolCall.invokeStatus,
+              id: toolMessage.id,
+              invokeStatus: toolMessage.invokeStatus,
             },
             transaction,
           },
         );
-        if (updated === 0) {
-          continue;
-        }
-        await this.db.getRepository('aiConversations.messages', this.sessionId).create({
-          values: toolCalls.map((toolCall) => ({
-            messageId: this.plugin.snowflake.generate(),
-            role: 'tool',
-            content: {
-              type: 'text',
-              content: toolMessageContent,
-            },
-            metadata: {
-              model,
-              provider: service.provider,
-              toolCall: toolCallMap.get(toolCall.toolCallId),
-              autoCall: toolCall.auto,
-            },
-            transaction,
-          })),
-        });
-        await this.aiToolMessagesRepo.update({
-          filter: {
-            messageId,
-            toolCallId: toolCall.toolCallId,
+      }
+      return await this.db.getRepository('aiConversations.messages', this.sessionId).create({
+        values: toolMessages.map((toolMessage) => ({
+          messageId: this.plugin.snowflake.generate(),
+          role: 'tool',
+          content: {
+            type: 'text',
+            content: toolMessageContent,
           },
-          values: {
-            invokeStatus: 'confirmed',
+          metadata: {
+            model,
+            provider: service.provider,
+            toolCall: toolCallMap.get(toolMessage.toolCallId),
+            toolCallId: toolMessage.toolCallId,
+            autoCall: toolMessage.auto,
           },
           transaction,
-        });
-      }
+        })),
+      });
     });
   }
 
@@ -1046,6 +1050,7 @@ If information is missing, clearly state it in the summary.</Important>`;
   private async formatMessages({ messages, provider }: { messages: AIMessageInput[]; provider: LLMProvider }) {
     const formattedMessages = [];
     const workContextHandler = this.plugin.workContextHandler;
+    await this.hydrateAttachmentsMeta(messages);
 
     // 截断过长的内容
     const truncate = (text: string, maxLen = 50000) => {
@@ -1079,28 +1084,42 @@ If information is missing, clearly state it in the summary.</Important>`;
             content = workContextStr + '\n' + content;
           }
         }
-        const contents = [];
+        const contentBlocks = [];
         if (attachments?.length) {
           for (const attachment of attachments) {
             const parsed = await provider.parseAttachment(this.ctx, attachment);
-            contents.push(parsed);
+            if (parsed.placement === 'system') {
+              formattedMessages.push({
+                role: 'system',
+                content: parsed.content,
+              });
+            } else {
+              contentBlocks.push(parsed.content);
+            }
           }
-          if (content) {
-            contents.push({
+          if (content && contentBlocks.length > 0) {
+            contentBlocks.push({
               type: 'text',
               text: content,
             });
           }
         }
-        formattedMessages.push({
-          role: 'user',
-          content: contents.length ? contents : content,
-          additional_kwargs: {
-            userContent,
-            attachments,
-            workContext,
-          },
-        });
+        const role = 'user';
+        const additional_kwargs = { userContent, attachments, workContext };
+        if (contentBlocks.length) {
+          formattedMessages.push({
+            role,
+            additional_kwargs,
+            contentBlocks,
+          });
+        } else {
+          formattedMessages.push({
+            role,
+            additional_kwargs,
+            content,
+          });
+        }
+
         continue;
       }
       if (msg.role === 'tool') {
@@ -1120,6 +1139,51 @@ If information is missing, clearly state it in the summary.</Important>`;
     }
 
     return formattedMessages;
+  }
+
+  private async hydrateAttachmentsMeta(messages: AIMessageInput[]) {
+    type AttachmentWithMeta = { id?: string | number; meta?: unknown };
+    const attachmentIds = new Set<string | number>();
+
+    for (const message of messages) {
+      if (!message.attachments?.length) {
+        continue;
+      }
+      for (const attachment of message.attachments as AttachmentWithMeta[]) {
+        if (attachment?.id != null) {
+          attachmentIds.add(attachment.id);
+        }
+      }
+    }
+
+    if (!attachmentIds.size) {
+      return;
+    }
+
+    const files = await this.aiFilesModel.findAll({
+      where: {
+        id: {
+          [Op.in]: Array.from(attachmentIds),
+        },
+      },
+      attributes: ['id', 'meta'],
+    });
+    const metaById = new Map(files.map((file) => [file.get('id') as string | number, file.get('meta')]));
+
+    for (const message of messages) {
+      if (!message.attachments?.length) {
+        continue;
+      }
+      for (const attachment of message.attachments as AttachmentWithMeta[]) {
+        if (attachment?.id == null) {
+          continue;
+        }
+        const meta = metaById.get(attachment.id);
+        if (meta !== undefined) {
+          attachment.meta = meta;
+        }
+      }
+    }
   }
 
   private async getToolCallMap(messageId: string): Promise<
@@ -1254,6 +1318,10 @@ If information is missing, clearly state it in the summary.</Important>`;
   private get aiToolMessagesModel() {
     return this.ctx.db.getModel('aiToolMessages');
   }
+
+  private get aiFilesModel() {
+    return this.ctx.db.getModel('aiFiles');
+  }
 }
 
 class AgentThread {
@@ -1319,6 +1387,20 @@ class ChatStreamProtocol {
 
   webSearch(content: { type: string; query: string }[]) {
     this.write({ type: 'web_search', body: content });
+  }
+
+  reasoning(content: { status: string; content: string }) {
+    this.write({ type: 'reasoning', body: content });
+  }
+
+  stopReasoning() {
+    this.write({
+      type: 'reasoning',
+      body: {
+        status: 'stop',
+        content: '',
+      },
+    });
   }
 
   toolCallChunks(content: unknown) {
