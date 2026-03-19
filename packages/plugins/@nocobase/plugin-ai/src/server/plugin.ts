@@ -41,6 +41,9 @@ import { aiContextDatasources } from './resource/aiContextDatasources';
 import { createWorkContextHandler } from './manager/work-context-handler';
 import { AICodingManager } from './manager/ai-coding-manager';
 import { kimiProviderOptions } from './llm-providers/kimi';
+import { DocumentLoaders } from './document-loader';
+import type PluginFileManagerServer from '@nocobase/plugin-file-manager';
+import { CheckpointCleaner, SequelizeCollectionSaver } from './ai-employees/checkpoints';
 // import { tongyiProviderOptions } from './llm-providers/tongyi';
 
 export class PluginAIServer extends Plugin {
@@ -51,6 +54,7 @@ export class PluginAIServer extends Plugin {
   aiContextDatasourceManager = new AIContextDatasourceManager(this);
   aiCodingManager = new AICodingManager(this);
   workContextHandler = createWorkContextHandler(this);
+  documentLoaders = new DocumentLoaders(this);
   snowflake: Snowflake;
 
   /**
@@ -71,6 +75,19 @@ export class PluginAIServer extends Plugin {
       },
     });
     this.snowflake = new Snowflake(pluginRecord?.createdAt.getTime());
+    this.app.cronJobManager.addJob({
+      cronTime: '0 0 2 * * *',
+      onTick: async () => {
+        try {
+          const checkpointSaver = new SequelizeCollectionSaver(() => this.app.mainDataSource);
+          const checkpointCleaner = new CheckpointCleaner(() => this.app.mainDataSource, checkpointSaver);
+          const expiredAt = new Date(Date.now() - 48 * 60 * 60 * 1000);
+          await checkpointCleaner.cleanOutdated(expiredAt);
+        } catch (e) {
+          this.app.log.error('langChain checkpoint clean job fail', e);
+        }
+      },
+    });
   }
 
   async load() {
@@ -102,12 +119,7 @@ export class PluginAIServer extends Plugin {
   registerTools() {
     const toolsManager = this.ai.toolsManager;
 
-    const docsModulesDescription = describeDocModules('Docs modules unavailable. Run ai:create-docs-index first.');
-
-    toolsManager.registerTools([
-      createDocsSearchTool({ description: docsModulesDescription }),
-      createReadDocEntryTool(),
-    ]);
+    toolsManager.registerTools([createDocsSearchTool(), createReadDocEntryTool()]);
 
     toolsManager.registerDynamicTools(getWorkflowCallers(this, 'workflowCaller'));
   }
@@ -255,6 +267,10 @@ export class PluginAIServer extends Plugin {
     return {
       aiContextDatasources: this.repository('aiContextDatasources'),
     };
+  }
+
+  get fileManager(): PluginFileManagerServer {
+    return this.app.pm.get('file-manager');
   }
 
   private repository(collectionName: string) {
