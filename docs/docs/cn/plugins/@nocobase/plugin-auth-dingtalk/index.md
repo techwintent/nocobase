@@ -1,6 +1,8 @@
 ---
 displayName: "认证：钉钉"
 packageName: '@nocobase/plugin-auth-dingtalk'
+title: "认证：钉钉"
+keywords: "认证：钉钉,插件,NocoBase"
 supportedVersions:
   - 1.x
   - 2.x
@@ -9,7 +11,7 @@ description: |
 isFree: false
 builtIn: false
 defaultEnabled: false
-editionLevel: 3
+editionLevel: 2
 ---
 
 # 认证：钉钉
