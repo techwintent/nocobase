@@ -1,0 +1,31 @@
+# Wintent NocoBase — Official image + clothing-store plugin
+# Build: docker build -f Dockerfile.wintent -t wintent/nocobase:latest .
+# The plugin is baked into the tarball so it's available on first startup.
+
+FROM nocobase/nocobase:latest
+
+# Inject plugin into the nocobase tarball
+# NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/
+# Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`
+COPY packages/plugins/@wintent/plugin-clothing-store/package.json \
+     /tmp/plugin/package.json
+COPY packages/plugins/@wintent/plugin-clothing-store/dist/ \
+     /tmp/plugin/dist/
+COPY packages/plugins/@wintent/plugin-clothing-store/server.js \
+     /tmp/plugin/server.js
+COPY packages/plugins/@wintent/plugin-clothing-store/server.d.ts \
+     /tmp/plugin/server.d.ts
+COPY packages/plugins/@wintent/plugin-clothing-store/client.js \
+     /tmp/plugin/client.js
+COPY packages/plugins/@wintent/plugin-clothing-store/client.d.ts \
+     /tmp/plugin/client.d.ts
+
+# Re-pack nocobase.tar.gz with the plugin included
+RUN cd /app && \
+    mkdir -p /tmp/nocobase && \
+    tar -zxf nocobase.tar.gz -C /tmp/nocobase && \
+    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store && \
+    cp -r /tmp/plugin/* /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store/ && \
+    rm nocobase.tar.gz && \
+    cd /tmp/nocobase && tar -czf /app/nocobase.tar.gz . && \
+    rm -rf /tmp/nocobase /tmp/plugin
