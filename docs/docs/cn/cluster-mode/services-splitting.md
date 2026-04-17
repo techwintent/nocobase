@@ -1,5 +1,6 @@
 ---
-title: "服务拆分 v1.9.0+"
+pkg: "@nocobase/preset-cluster"
+title: "服务拆分"
 description: "集群模式下将工作流、异步任务等耗时服务拆分到独立节点，通过 WORKER_MODE 配置请求节点与任务节点，支持水平扩展与资源隔离。"
 keywords: "服务拆分,WORKER_MODE,异步工作流,async-task,水平扩展,请求节点,任务节点,集群部署,NocoBase"
 ---
@@ -67,12 +68,14 @@ NocoBase 在集群部署时可以将不同服务拆分部署到不同的节点�
 开发业务插件时，可根据需求场景，针对较大资源消耗的服务进行拆分。可以通过以下方式实现：
 
 1. 定义一个新的服务标识，例如 `my-plugin:process`，用于环境变量配置，并提供文档说明。
-2. 在插件服务端的业务功能中，使用 `app.serving()` 的接口对环境进行判断，来决定是否由环境变量控制当前节点提供某个业务。
+2. 在插件服务端的业务功能中，使用 `serving()` 的接口对环境进行判断，来决定是否由环境变量控制当前节点提供某个业务。
 
 ```javascript
+import { serving } from '@nocobase/server';
+
 const MY_PLUGIN_SERVICE_KEY = 'my-plugin:process';
 // 在插件的服务端代码中
-if (this.app.serving(MY_PLUGIN_SERVICE_KEY)) {
+if (serving(MY_PLUGIN_SERVICE_KEY)) {
   // 处理该服务的业务逻辑
 } else {
   // 不处理该服务的业务逻辑

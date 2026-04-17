@@ -19,7 +19,7 @@ export class ChartResource<TData = any> extends BaseRecordResource<TData> {
   private refreshTimer: NodeJS.Timeout | null = null;
 
   protected request = {
-    url: 'charts:query',
+    url: 'charts:queryData',
     method: 'post',
     params: {} as Record<string, any>,
     data: {} as Record<string, any>,
@@ -116,6 +116,7 @@ export class ChartResource<TData = any> extends BaseRecordResource<TData> {
       orders: query.orders,
       limit: query.limit,
       offset: query.offset,
+      contextParams: query.contextParams,
     };
     return data;
   }
@@ -142,8 +143,8 @@ export class ChartResource<TData = any> extends BaseRecordResource<TData> {
       }
     }
 
-    // 请求数据 api.post('charts:query')
-    return await this.runAction<TData, any>('query', this.getRefreshRequestOptions());
+    // 请求数据 api.post('charts:queryData')
+    return await this.runAction<TData, any>('queryData', this.getRefreshRequestOptions());
   }
 
   // debounce 刷新数据

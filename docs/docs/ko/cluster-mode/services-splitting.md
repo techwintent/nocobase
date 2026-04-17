@@ -1,3 +1,10 @@
+---
+pkg: "@nocobase/preset-cluster"
+title: "서비스 분리"
+description: "워크플로·비동기 작업 등을 전용 노드로 분리. WORKER_MODE로 요청 노드와 작업 노드, 수평 확장."
+keywords: "서비스 분리,WORKER_MODE,비동기 워크플로,async-task,수평 확장,요청 노드,작업 노드,NocoBase"
+---
+
 :::tip
 이 문서는 AI로 번역되었습니다. 부정확한 내용이 있을 경우 [영어 버전](/en)을 참조하세요
 :::
@@ -65,12 +72,14 @@ NocoBase를 클러스터에 배포할 때, 여러 서비스를 분리하여 다�
 비즈니스 플러그인 개발 시, 요구 사항 시나리오에 따라 리소스 소모가 큰 서비스를 분리할 수 있습니다. 이는 다음 방법으로 구현할 수 있습니다.
 
 1. `my-plugin:process`와 같은 새로운 서비스 식별자를 정의하고, 환경 변수 설정에 사용하며 관련 문서를 제공합니다.
-2. 플러그인의 서버 측 비즈니스 로직에서 `app.serving()` 인터페이스를 사용하여 환경을 판단하고, 환경 변수에 따라 현재 노드가 특정 서비스를 제공할지 여부를 결정합니다.
+2. 플러그인의 서버 측 비즈니스 로직에서 `serving()` 인터페이스를 사용하여 환경을 판단하고, 환경 변수에 따라 현재 노드가 특정 서비스를 제공할지 여부를 결정합니다.
 
 ```javascript
+import { serving } from '@nocobase/server';
+
 const MY_PLUGIN_SERVICE_KEY = 'my-plugin:process';
 // 플러그인의 서버 측 코드에서
-if (this.app.serving(MY_PLUGIN_SERVICE_KEY)) {
+if (serving(MY_PLUGIN_SERVICE_KEY)) {
   // 해당 서비스의 비즈니스 로직 처리
 } else {
   // 해당 서비스의 비즈니스 로직을 처리하지 않음

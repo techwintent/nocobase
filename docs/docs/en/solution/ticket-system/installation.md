@@ -9,8 +9,8 @@ Before you begin, please ensure:
 - You already have a basic NocoBase running environment. For main system installation, please refer to the detailed [official installation documentation](https://docs.nocobase.com/welcome/getting-started/installation).
 - NocoBase version **2.0.0-beta.5 and above**.
 - You have downloaded the corresponding files for the ticketing system:
-  - **Backup file**: [nocobase_tts_v2_backup_260302.nbdata](https://static-docs.nocobase.com/nocobase_tts_v2_backup_260302.nbdata) - For Method 1
-  - **SQL file**: [nocobase_tts_v2_sql_260302.zip](https://static-docs.nocobase.com/nocobase_tts_v2_sql_260302.zip) - For Method 2
+  - **Backup file**: [nocobase_tickets_v2_backup_260324.nbdata](https://static-docs.nocobase.com/nocobase_tickets_v2_backup_260324.nbdata) - For Method 1
+  - **SQL file**: [nocobase_tickets_v2_sql_260324.zip](https://static-docs.nocobase.com/nocobase_tickets_v2_sql_260324.zip) - For Method 2
 
 **Important Notes**:
 - This solution is built on **PostgreSQL 16**. Please ensure your environment uses PostgreSQL 16.
@@ -128,3 +128,6 @@ Configure your NocoBase startup parameters (such as environment variables `DB_HO
 | **Recommended Scenarios** | Enterprise users with a controlled, consistent environment who need complete functionality | Missing some plugins, seeking high compatibility and flexibility, non-Pro/Enterprise users, can accept the loss of file-related functions |
 
 We hope this tutorial helps you successfully deploy the ticketing system. If you encounter any issues during the process, please feel free to contact us!
+---
+
+*Last updated: 2026-03-24*

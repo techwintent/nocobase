@@ -66,6 +66,9 @@ const AITextMessageRenderer: React.FC<{
         size="small"
         bordered={false}
         defaultActiveKey="thinking"
+        style={{
+          marginBottom: 14,
+        }}
         items={[
           {
             key: 'thinking',
@@ -88,19 +91,20 @@ const AITextMessageRenderer: React.FC<{
 
   if (!provider?.components?.MessageRenderer) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-        }}
-      >
+      <>
         {reasoningPanel}
-        {typeof msg.content === 'string' && <Markdown message={msg} />}
-        {msg.tool_calls?.length ? (
-          <ToolCard toolCalls={msg.tool_calls} messageId={msg.messageId} inlineActions={toolInlineActions} />
-        ) : null}
-      </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {typeof msg.content === 'string' && <Markdown message={msg} />}
+          {msg.tool_calls?.length ? (
+            <ToolCard toolCalls={msg.tool_calls} messageId={msg.messageId} inlineActions={toolInlineActions} />
+          ) : null}
+        </div>
+      </>
     );
   }
   const M = provider.components.MessageRenderer;
@@ -182,24 +186,26 @@ export const AIMessage: React.FC<{
   const messageActions =
     msg.type !== 'greeting' ? (
       <Space>
-        <Button
-          color="default"
-          variant="text"
-          size="small"
-          style={footerButtonStyle}
-          icon={
-            <ReloadOutlined
-              style={footerIconStyle}
-              onClick={() =>
-                resendMessages({
-                  sessionId: currentConversation,
-                  messageId: msg.messageId,
-                  aiEmployee: currentEmployee,
-                })
-              }
-            />
-          }
-        />
+        {msg.from === 'main-agent' && (
+          <Button
+            color="default"
+            variant="text"
+            size="small"
+            style={footerButtonStyle}
+            icon={
+              <ReloadOutlined
+                style={footerIconStyle}
+                onClick={() =>
+                  resendMessages({
+                    sessionId: currentConversation,
+                    messageId: msg.messageId,
+                    aiEmployee: currentEmployee,
+                  })
+                }
+              />
+            }
+          />
+        )}
         {typeof msg.content === 'string' && msg.content && (
           <Button
             color="default"
@@ -292,22 +298,24 @@ export const UserMessage: React.FC<{
       `)}
       footer={
         <Space>
-          <Button
-            color="default"
-            variant="text"
-            size="small"
-            style={footerButtonStyle}
-            icon={
-              <EditOutlined
-                style={footerIconStyle}
-                onClick={() => {
-                  startEditingMessage(msg);
-                  setSenderValue(msg.content);
-                  senderRef.current?.focus();
-                }}
-              />
-            }
-          />
+          {msg.from === 'main-agent' && (
+            <Button
+              color="default"
+              variant="text"
+              size="small"
+              style={footerButtonStyle}
+              icon={
+                <EditOutlined
+                  style={footerIconStyle}
+                  onClick={() => {
+                    startEditingMessage(msg);
+                    setSenderValue(msg.content);
+                    senderRef.current?.focus();
+                  }}
+                />
+              }
+            />
+          )}
           {typeof msg.content === 'string' && msg.content && (
             <Button
               color="default"

@@ -16,12 +16,15 @@
  * For more information, see <https://www.nocobase.com/agreement>
  */
 
+import Joi from 'joi';
 import PluginErrorHandler from '@nocobase/plugin-error-handler';
 import WorkflowPluginServer, {
   EventOptions,
   EXECUTION_STATUS,
   Trigger,
+  validateCollectionField,
   WorkflowModel,
+  getWorkflowExecutionLogMeta,
 } from '@nocobase/plugin-workflow';
 import { joinCollectionName, parseCollectionName } from '@nocobase/data-source-manager';
 import Application from '@nocobase/server';
@@ -42,6 +45,27 @@ class CustomActionInterceptionError extends Error {
 
 export default class CustomActionTrigger extends Trigger {
   static TYPE = EVENT_TYPE;
+
+  configSchema = Joi.object({
+    type: Joi.number().valid(CONTEXT_TYPE.SINGLE_RECORD, CONTEXT_TYPE.MULTIPLE_RECORDS, CONTEXT_TYPE.GLOBAL).required(),
+    collection: Joi.when('type', {
+      is: Joi.valid(CONTEXT_TYPE.SINGLE_RECORD, CONTEXT_TYPE.MULTIPLE_RECORDS),
+      then: Joi.string().required().messages({ 'any.required': 'Collection is required for record-based context' }),
+      otherwise: Joi.string().allow(null, ''),
+    }),
+    appends: Joi.array().items(Joi.string()).optional(),
+  });
+
+  validateConfig(config: Record<string, any>) {
+    const errors = super.validateConfig(config);
+    if (errors) {
+      return errors;
+    }
+    if (config.collection) {
+      return validateCollectionField(config.collection, this.workflow.app.dataSourceManager);
+    }
+    return null;
+  }
 
   async globalTriggerAction(context: Context, next: Next) {
     const { triggerWorkflows, values = {} } = context.action.params;
@@ -219,10 +243,31 @@ export default class CustomActionTrigger extends Trigger {
       return context.throw(500, 'No action done, please contact the administrator');
     }
 
-    for (const event of syncGroup) {
-      const processor = await this.workflow.trigger(event[0], event[1], { httpContext: context });
+    const { resourceName, actionName } = context.action;
+
+    for (const [index, event] of syncGroup.entries()) {
+      const workflow = event[0];
+      const syncLogMeta = {
+        workflowId: workflow.id,
+        workflowKey: workflow.key,
+        workflowTitle: workflow.title,
+        resourceName,
+        actionName,
+        currentSyncOrder: index + 1,
+        totalSyncWorkflows: syncGroup.length,
+        remainingSyncWorkflows: syncGroup.length - index - 1,
+        pendingAsyncWorkflows: asyncGroup.length,
+      };
+
+      context.logger.debug('[Workflow custom-action]: executing sync workflow', syncLogMeta);
+
+      const processor = await this.workflow.trigger(workflow, event[1], { httpContext: context });
       // NOTE: workflow trigger failed
       if (!processor) {
+        context.logger.error(
+          '[Workflow custom-action]: sync workflow trigger failed before execution created',
+          syncLogMeta,
+        );
         return context.throw(500);
       }
 
@@ -231,23 +276,43 @@ export default class CustomActionTrigger extends Trigger {
       // NOTE: passthrough
       if (processor.execution.status === EXECUTION_STATUS.RESOLVED) {
         if (lastNode?.type === 'end') {
+          context.logger.debug('[Workflow custom-action]: sync workflow ended request chain on end node', {
+            ...syncLogMeta,
+            ...getWorkflowExecutionLogMeta(workflow, processor),
+          });
           // NOTE: response will be set in data-wrapper middleware
           return;
         }
+        context.logger.debug('[Workflow custom-action]: sync workflow finished successfully', {
+          ...syncLogMeta,
+          ...getWorkflowExecutionLogMeta(workflow, processor),
+        });
         continue;
       }
       // NOTE: intercept
       if (processor.execution.status < EXECUTION_STATUS.STARTED) {
         if (lastNode?.type !== 'end') {
+          context.logger.error('[Workflow custom-action]: sync workflow failed', {
+            ...syncLogMeta,
+            ...getWorkflowExecutionLogMeta(workflow, processor),
+          });
           return context.throw(500, 'Workflow on your action failed, please contact the administrator');
         }
 
+        context.logger.warn('[Workflow custom-action]: sync workflow intercepted request on end node', {
+          ...syncLogMeta,
+          ...getWorkflowExecutionLogMeta(workflow, processor),
+        });
         const err = new CustomActionInterceptionError('Request is intercepted by workflow');
         err.status = 400;
         err.messages = context.state.messages;
         return context.throw(err.status, err);
       }
       // NOTE: should not be pending
+      context.logger.error('[Workflow custom-action]: sync workflow is still pending after trigger', {
+        ...syncLogMeta,
+        ...getWorkflowExecutionLogMeta(workflow, processor),
+      });
       return context.throw(500, 'Workflow on your action hangs, please contact the administrator');
     }
 
