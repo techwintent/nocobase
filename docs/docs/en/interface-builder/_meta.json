@@ -59,6 +59,11 @@
             "type": "custom-link",
             "label": "Form",
             "link": "/interface-builder/blocks/filter-blocks/form"
+          },
+          {
+            "type": "custom-link",
+            "label": "Tree",
+            "link": "/interface-builder/blocks/filter-blocks/tree"
           }
         ]
       },
@@ -438,6 +443,11 @@
           },
           {
             "type": "custom-link",
+            "label": "Custom Request",
+            "link": "/interface-builder/actions/types/custom-request"
+          },
+          {
+            "type": "custom-link",
             "label": "Pop-up",
             "link": "/interface-builder/actions/types/link"
           },
@@ -485,6 +495,11 @@
             "type": "custom-link",
             "label": "JS Action",
             "link": "/interface-builder/actions/types/js-action"
+          },
+          {
+            "type": "custom-link",
+            "label": "JS Item",
+            "link": "/interface-builder/actions/types/js-item"
           }
         ]
       },

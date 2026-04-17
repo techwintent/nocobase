@@ -10,14 +10,27 @@
 import type { McpTool } from '@nocobase/ai';
 import type { McpToolCallContext } from '@nocobase/ai';
 import type { OpenAPIV3 } from 'openapi-types';
+import { Application } from '@nocobase/server';
 import { requireModule } from '@nocobase/utils';
 import { merge as deepmerge } from '@nocobase/utils';
 import inject from 'light-my-request';
+import { sanitizeJsonSchemaForOpenAITools } from './schema-utils';
 
 type OpenAPIDocument = OpenAPIV3.Document;
 type McpToolDefinitionWithBaseUrl = import('openapi-mcp-generator').McpToolDefinition & { baseUrl?: string };
 
 const SWAGGER_TARGETS = ['swagger.json', 'swagger/index.json', 'swagger'];
+export const DEFAULT_MCP_PACKAGE_PATTERNS = [
+  '@nocobase/plugin-data-source-main',
+  '@nocobase/plugin-data-source-manager',
+  '@nocobase/plugin-workflow*',
+  '@nocobase/plugin-acl',
+  '@nocobase/plugin-users',
+  '@nocobase/plugin-auth',
+  '@nocobase/plugin-client',
+  '@nocobase/plugin-flow-engine',
+  '@nocobase/plugin-ai',
+];
 
 function getSwaggerPrefixes() {
   if (process.env.NODE_ENV === 'production') {
@@ -43,10 +56,110 @@ function loadSwagger(packageName: string): Partial<OpenAPIDocument> {
   return {};
 }
 
+export function normalizePackageName(packageName: string) {
+  const normalized = packageName.trim();
+  if (!normalized) {
+    return '';
+  }
+  if (normalized.startsWith('@')) {
+    return normalized;
+  }
+  return `@nocobase/${normalized}`;
+}
+
+export function normalizePackagePatterns(packageNames: string[] = []) {
+  return [...new Set(packageNames.map(normalizePackageName).filter(Boolean))];
+}
+
+function matchesPackagePattern(packageName: string, pattern: string) {
+  if (pattern.endsWith('*')) {
+    return packageName.startsWith(pattern.slice(0, -1));
+  }
+  return packageName === pattern;
+}
+
+function shouldIncludePackage(packageName: string, patterns?: string[]) {
+  const normalizedPatterns = patterns?.length ? normalizePackagePatterns(patterns) : DEFAULT_MCP_PACKAGE_PATTERNS;
+  return normalizedPatterns.some((pattern) => matchesPackagePattern(packageName, pattern));
+}
+
 function mergeSwagger(target: OpenAPIDocument, source: Partial<OpenAPIDocument>): OpenAPIDocument {
   return deepmerge(target, source, {
     arrayMerge: (destinationArray, sourceArray) => sourceArray.concat(destinationArray),
   }) as OpenAPIDocument;
+}
+
+function resolveLocalRef(document: OpenAPIDocument, ref: string) {
+  if (!ref.startsWith('#/')) {
+    return undefined;
+  }
+
+  return ref
+    .slice(2)
+    .split('/')
+    .reduce<any>((current, segment) => current?.[segment], document);
+}
+
+function dereferenceNode(node: any, document: OpenAPIDocument, seen = new Set<string>()) {
+  if (Array.isArray(node)) {
+    return node.map((item) => dereferenceNode(item, document, seen));
+  }
+
+  if (!node || typeof node !== 'object') {
+    return node;
+  }
+
+  if (typeof node.$ref === 'string') {
+    if (seen.has(node.$ref)) {
+      return {};
+    }
+    const resolved = resolveLocalRef(document, node.$ref);
+    if (!resolved) {
+      return node;
+    }
+    return dereferenceNode(resolved, document, new Set([...seen, node.$ref]));
+  }
+
+  return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, dereferenceNode(value, document, seen)]));
+}
+
+function prepareSwaggerForMcpTools(document: OpenAPIDocument): OpenAPIDocument {
+  const swagger = {
+    ...document,
+    paths: {},
+  } as OpenAPIDocument;
+
+  for (const [path, pathItem] of Object.entries(document.paths || {})) {
+    if (!pathItem) {
+      continue;
+    }
+
+    const nextPathItem: Record<string, any> = {
+      ...pathItem,
+    };
+
+    if (Array.isArray(pathItem.parameters)) {
+      nextPathItem.parameters = dereferenceNode(pathItem.parameters, document);
+    }
+
+    for (const method of ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'] as const) {
+      const operation = pathItem[method];
+      if (!operation) {
+        continue;
+      }
+      nextPathItem[method] = {
+        ...operation,
+        parameters: Array.isArray(operation.parameters)
+          ? dereferenceNode(operation.parameters, document)
+          : operation.parameters,
+        requestBody: operation.requestBody ? dereferenceNode(operation.requestBody, document) : operation.requestBody,
+      };
+    }
+
+    swagger.paths[path] = nextPathItem as any;
+  }
+
+  return swagger;
 }
 
 function joinUrl(baseUrl: string, path: string) {
@@ -56,6 +169,71 @@ function joinUrl(baseUrl: string, path: string) {
   const normalizedBase = baseUrl.replace(/\/$/, '');
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${normalizedBase}${normalizedPath}`;
+}
+
+export function parseResourceActionFromPath(pathTemplate: string) {
+  const normalizedPath = pathTemplate.replace(/^\/+/, '');
+  const separatorIndex = normalizedPath.lastIndexOf(':');
+
+  if (separatorIndex === -1) {
+    return {};
+  }
+
+  const resourcePath = normalizedPath.slice(0, separatorIndex);
+  const actionName = normalizedPath.slice(separatorIndex + 1);
+  const resourceName = resourcePath
+    .split('/')
+    .filter((segment) => segment && !segment.startsWith('{'))
+    .join('.');
+
+  if (!resourceName || !actionName) {
+    return {};
+  }
+
+  return {
+    resourceName,
+    actionName,
+  };
+}
+
+function buildQueryValue(value: any) {
+  if (typeof value === 'undefined') {
+    return undefined;
+  }
+
+  if (value === null) {
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return value;
+}
+
+function formatToolName(name: string) {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/[.:\-/\s]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase()
+    .replace(/^(get|post|put|delete|patch|options|head|trace)_/, '');
+}
+
+export function normalizeMcpToolName(tool: Pick<McpToolDefinitionWithBaseUrl, 'name' | 'pathTemplate'>) {
+  const actionMeta = parseResourceActionFromPath(tool.pathTemplate);
+
+  if (actionMeta.resourceName && actionMeta.actionName) {
+    return formatToolName(`${actionMeta.resourceName}_${actionMeta.actionName}`);
+  }
+
+  return formatToolName(tool.name);
 }
 
 function buildRequest(
@@ -83,7 +261,7 @@ function buildRequest(
       continue;
     }
     if (parameter.in === 'query') {
-      query[parameter.name] = value;
+      query[parameter.name] = buildQueryValue(value);
       continue;
     }
     if (parameter.in === 'header') {
@@ -128,14 +306,10 @@ function buildRequest(
 }
 
 export async function collectMcpToolsFromSwagger(options: {
-  app: {
-    db: any;
-    version: { get: () => Promise<string> };
-    resourcer: { options?: { prefix?: string } };
-    callback: () => any;
-  };
+  app: Application;
+  packagePatterns?: string[];
 }): Promise<McpTool[]> {
-  const { app } = options;
+  const { app, packagePatterns } = options;
   const plugins = await app.db.getRepository('applicationPlugins').find({
     filter: {
       enabled: true,
@@ -156,11 +330,13 @@ export async function collectMcpToolsFromSwagger(options: {
     ],
   } as OpenAPIDocument;
 
-  swagger = mergeSwagger(swagger, loadSwagger('@nocobase/server'));
+  if (shouldIncludePackage('@nocobase/server', packagePatterns)) {
+    swagger = mergeSwagger(swagger, loadSwagger('@nocobase/server'));
+  }
 
   for (const plugin of plugins) {
     const packageName = plugin.get('packageName');
-    if (!packageName) {
+    if (!packageName || !shouldIncludePackage(packageName, packagePatterns)) {
       continue;
     }
     const pluginSwagger = loadSwagger(packageName);
@@ -170,14 +346,22 @@ export async function collectMcpToolsFromSwagger(options: {
     swagger = mergeSwagger(swagger, pluginSwagger);
   }
 
+  // Resolve local refs used by tool inputs.
+  swagger = prepareSwaggerForMcpTools(swagger);
+
   const { getToolsFromOpenApi } = await import('openapi-mcp-generator');
   const mcpTools = (await getToolsFromOpenApi(swagger)) as McpToolDefinitionWithBaseUrl[];
 
   return mcpTools.map((tool) => {
-    return {
-      name: tool.name,
+    const actionMeta = parseResourceActionFromPath(tool.pathTemplate);
+    const mcpTool: McpTool = {
+      name: normalizeMcpToolName(tool),
       description: tool.description,
-      inputSchema: tool.inputSchema,
+      resourceName: actionMeta.resourceName,
+      actionName: actionMeta.actionName,
+      path: tool.pathTemplate,
+      method: tool.method.toUpperCase(),
+      inputSchema: sanitizeJsonSchemaForOpenAITools(tool.inputSchema),
       call: async (args: Record<string, any>, context?: McpToolCallContext) => {
         const request = buildRequest(tool, args, context);
         if (request.missingPathParams.length > 0) {
@@ -214,8 +398,18 @@ export async function collectMcpToolsFromSwagger(options: {
           );
         }
 
-        return body;
+        return app.aiManager.mcpToolsManager.postProcessToolResult(mcpTool, body, {
+          args,
+          callContext: context,
+          response: {
+            statusCode: response.statusCode,
+            headers: response.headers,
+            body,
+          },
+        });
       },
     };
+
+    return mcpTool;
   });
 }

@@ -13,8 +13,8 @@
 - 이미 기초적인 NocoBase 실행 환경을 갖추고 있어야 합니다. 메인 시스템 설치에 대해서는 상세한 [공식 설치 문서](https://docs-cn.nocobase.com/welcome/getting-started/installation)를 참고하십시오.
 - NocoBase 버전 **2.0.0-beta.5 이상**
 - 워크오더 시스템의 해당 파일을 이미 다운로드했습니다:
-  - **백업 파일**: [nocobase_tts_v2_backup_260302.nbdata](https://static-docs.nocobase.com/nocobase_tts_v2_backup_260302.nbdata) - 방법 1에 적용
-  - **SQL 파일**: [nocobase_tts_v2_sql_260302.zip](https://static-docs.nocobase.com/nocobase_tts_v2_sql_260302.zip) - 방법 2에 적용
+  - **백업 파일**: [nocobase_tickets_v2_backup_260324.nbdata](https://static-docs.nocobase.com/nocobase_tickets_v2_backup_260324.nbdata) - 방법 1에 적용
+  - **SQL 파일**: [nocobase_tickets_v2_sql_260324.zip](https://static-docs.nocobase.com/nocobase_tickets_v2_sql_260324.zip) - 방법 2에 적용
 
 **중요 설명**:
 - 본 솔루션은 **PostgreSQL 16** 데이터베이스를 기반으로 제작되었습니다. 귀하의 환경에서 PostgreSQL 16을 사용 중인지 확인하십시오.
@@ -132,3 +132,6 @@ NocoBase 시작 매개변수(예: 환경 변수 `DB_HOST`, `DB_PORT`, `DB_DATABA
 | **권장 시나리오** | 기업 사용자이며 환경 제어가 가능하고 일치하며, 완전한 기능이 필요한 경우 | 일부 플러그인이 누락되었거나 높은 호환성 및 유연성을 추구하는 경우, 전문가/기업용 버전 미사용자, 파일 기능 유실 감수 가능 시 |
 
 본 튜토리얼이 워크오더 시스템을 성공적으로 배포하는 데 도움이 되기를 바랍니다. 작업 과정에서 문제가 발생하면 언제든지 저희에게 연락해 주세요!
+---
+
+*Last updated: 2026-03-24*

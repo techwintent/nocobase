@@ -11,6 +11,7 @@ import { once } from 'node:events';
 import path from 'node:path';
 import { Worker } from 'node:worker_threads';
 import winston, { Logger } from 'winston';
+import Joi from 'joi';
 
 import { Processor, Instruction, JOB_STATUS, FlowNodeModel, IJob } from '@nocobase/plugin-workflow';
 
@@ -19,11 +20,21 @@ import { CacheTransport } from './cache-logger';
 type ScriptConfig = { content?: string; timeout?: number; continue?: boolean; arguments?: { [key: string]: any }[] };
 
 export default class ScriptInstruction extends Instruction {
+  /**
+   * Returns the worker script path based on whether WORKFLOW_SCRIPT_MODULES is configured.
+   * - WORKFLOW_SCRIPT_MODULES set: uses Node.js vm with require support (module whitelist)
+   * - WORKFLOW_SCRIPT_MODULES unset: uses isolated-vm for maximum security (no require, no Node.js APIs)
+   */
+  static get workerScript() {
+    const hasModules = process.env.WORKFLOW_SCRIPT_MODULES?.split(',').filter(Boolean).length > 0;
+    return path.join(__dirname, hasModules ? 'Vm.js' : 'IsolatedVm.js');
+  }
+
   static async run(source, args, options: { logger: Logger; timeout?: number }) {
     const { logger, timeout } = options;
     let result;
 
-    const worker = new Worker(path.join(__dirname, 'Vm.js'), {
+    const worker = new Worker(this.workerScript, {
       workerData: { source, args, options: timeout ? { timeout } : {} },
     });
 
@@ -75,6 +86,20 @@ export default class ScriptInstruction extends Instruction {
       result,
     };
   }
+
+  configSchema = Joi.object({
+    content: Joi.string(),
+    timeout: Joi.number(),
+    continue: Joi.boolean(),
+    arguments: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().required(),
+          value: Joi.any(),
+        }),
+      )
+      .optional(),
+  });
 
   async run(node: FlowNodeModel, prevJob, processor: Processor) {
     const { content = '', continue: cont, timeout } = node.config as ScriptConfig;

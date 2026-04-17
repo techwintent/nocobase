@@ -13,8 +13,8 @@
 - すでに基礎的な NocoBase 実行環境があること。メインシステムのインストールについては、詳細な[公式インストールドキュメント](https://docs-cn.nocobase.com/welcome/getting-started/installation)を参照してください。
 - NocoBase バージョン **2.0.0-beta.5 以上**
 - チケットシステムの対応するファイルをダウンロード済みであること：
-  - **バックアップファイル**：[nocobase_tts_v2_backup_260302.nbdata](https://static-docs.nocobase.com/nocobase_tts_v2_backup_260302.nbdata) - 方法 1 に適用
-  - **SQL ファイル**：[nocobase_tts_v2_sql_260302.zip](https://static-docs.nocobase.com/nocobase_tts_v2_sql_260302.zip) - 方法 2 に適用
+  - **バックアップファイル**：[nocobase_tickets_v2_backup_260324.nbdata](https://static-docs.nocobase.com/nocobase_tickets_v2_backup_260324.nbdata) - 方法 1 に適用
+  - **SQL ファイル**：[nocobase_tickets_v2_sql_260324.zip](https://static-docs.nocobase.com/nocobase_tickets_v2_sql_260324.zip) - 方法 2 に適用
 
 **重要事項**：
 - 本ソリューションは **PostgreSQL 16** データベースに基づいて作成されています。環境で PostgreSQL 16 を使用していることを確認してください。
@@ -132,3 +132,6 @@ NocoBase の起動パラメータ（環境変数 `DB_HOST`, `DB_PORT`, `DB_DATAB
 | **推奨シーン**   | エンタープライズユーザーで、環境が制御可能かつ一致しており、完全な機能が必要な場合                     | 一部のプラグインが不足しており、高い互換性と柔軟性を求める非プロフェッショナル/エンタープライズ版ユーザーで、ファイル機能の欠落を許容できる場合                                |
 
 このチュートリアルがチケットシステムの円滑なデプロイに役立つことを願っています。操作中に問題が発生した場合は、いつでもお気軽にお問い合わせください！
+---
+
+*Last updated: 2026-03-24*

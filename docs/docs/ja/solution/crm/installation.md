@@ -13,8 +13,8 @@ CRM 2.0 ソリューションをお客様自身の NocoBase 環境に迅速か�
 - すでに基礎となる NocoBase 実行環境があること。メインシステムのインストールについては、詳細な[公式インストールドキュメント](https://docs-cn.nocobase.com/welcome/getting-started/installation)を参照してください。
 - NocoBase バージョン **v2.1.0-beta.2 以上**
 - CRM システムの対応するファイルをダウンロード済みであること：
-  - **バックアップファイル**：[nocobase_crm_v2_backup_260223.nbdata](https://static-docs.nocobase.com/nocobase_crm_v2_backup_260223.nbdata) - 方法 1 に適用
-  - **SQL ファイル**：[nocobase_crm_v2_sql_260223.zip](https://static-docs.nocobase.com/nocobase_crm_v2_sql_260223.zip) - 方法 2 に適用
+  - **バックアップファイル**：[nocobase_crm_v2_backup_260406.nbdata](https://static-docs.nocobase.com/nocobase_crm_v2_backup_260406.nbdata) - 方法 1 に適用
+  - **SQL ファイル**：[nocobase_crm_v2_sql_260406.zip](https://static-docs.nocobase.com/nocobase_crm_v2_sql_260406.zip) - 方法 2 に適用
 
 **重要事項**：
 - 本ソリューションは **PostgreSQL 16** データベースに基づいて作成されています。環境で PostgreSQL 16 を使用していることを確認してください。
@@ -98,13 +98,13 @@ docker pull nocobase/nocobase:beta-full
 ダウンロードしたデータベースファイル（通常は `.sql` 形式）を取得し、その内容を前のステップで準備したデータベースにインポートします。実行方法は環境によって異なります：
 
 * **オプション A：サーバーのコマンドライン経由（Docker を例に）**
-  Docker で NocoBase とデータベースをインストールしている場合、`.sql` ファイルをサーバーにアップロードし、`docker exec` コマンドを使用してインポートを実行できます。PostgreSQL コンテナ名が `my-nocobase-db`、ファイル名が `nocobase_crm_v2_sql_260223.sql` であると仮定します：
+  Docker で NocoBase とデータベースをインストールしている場合、`.sql` ファイルをサーバーにアップロードし、`docker exec` コマンドを使用してインポートを実行できます。PostgreSQL コンテナ名が `my-nocobase-db`、ファイル名が `nocobase_crm_v2_sql_260327.sql` であると仮定します：
 
   ```bash
   # sql ファイルをコンテナ内にコピー
-  docker cp nocobase_crm_v2_sql_260223.sql my-nocobase-db:/tmp/
+  docker cp nocobase_crm_v2_sql_260327.sql my-nocobase-db:/tmp/
   # コンテナに入りインポートコマンドを実行
-  docker exec -it my-nocobase-db psql -U nocobase -d nocobase -f /tmp/nocobase_crm_v2_sql_260223.sql
+  docker exec -it my-nocobase-db psql -U nocobase -d nocobase -f /tmp/nocobase_crm_v2_sql_260327.sql
   ```
 * **オプション B：リモートデータベースクライアント経由（Navicat など）**
   データベースのポートが公開されている場合、任意のグラフィカルデータベースクライアント（Navicat、DBeaver、pgAdmin など）を使用してデータベースに接続し、以下を行います：
@@ -135,3 +135,6 @@ NocoBase の起動パラメータ（環境変数 `DB_HOST`、`DB_PORT`、`DB_DAT
 | **推奨シーン**   | エンタープライズユーザーで、環境が制御可能かつ一致しており、完全な機能を必要とする場合                     | 一部のプラグインが不足しており、高い互換性と柔軟性を求める場合、または非プロフェッショナル/エンタープライズ版ユーザーで、ファイル機能の欠如を許容できる場合                                |
 
 このチュートリアルが CRM 2.0 システムの円滑なデプロイに役立つことを願っています。操作中に問題が発生した場合は、いつでもお気軽にお問い合わせください！
+---
+
+*Last updated: 2026-04-02*
