@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-delivery",
+  "displayName": "Wintent Delivery Facet Collections",
+  "displayName.zh-CN": "Wintent 课程交付 Facet 集合",
+  "description": "Per-facet collections for delivery (courses / course_modules / course_materials). Captures course-creation work; modules can reverse-link to source reflections via source_reflection_id.",
+  "description.zh-CN": "课程交付 facet 数据底座 (3 个 collection)。模块可通过 source_reflection_id 反向链接到 reflections 中的素材。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-scheduling",
+  "displayName": "Wintent Scheduling Facet Collections",
+  "displayName.zh-CN": "Wintent 排课 Facet 集合",
+  "description": "Per-facet collections for scheduling (schedule_slots / schedule_conflicts). Enables AI to take over the cognitive load of remembering schedules + proactively detect overlaps.",
+  "description.zh-CN": "排课 facet 数据底座 (2 个 collection)。让 AI 接管'靠记忆排课'的认知负担 + 主动撞课检测。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}
