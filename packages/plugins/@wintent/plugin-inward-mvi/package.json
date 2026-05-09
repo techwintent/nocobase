@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-inward-mvi",
+  "displayName": "Wintent Inward MVI Collections",
+  "displayName.zh-CN": "Wintent 对内 MVI 集合",
+  "description": "Universal inward-axis 5 MVI collections — reflections / learning_log / aspirations / state_monitor / soul_profile. Applied to every Wintent instance regardless of vertical pack.",
+  "description.zh-CN": "对内轴 5 件最小可行实现 (MVI) 集合，跨 vertical 普世。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}

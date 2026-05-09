@@ -1,31 +1,62 @@
-# Wintent NocoBase — Official image + clothing-store plugin
+# Wintent NocoBase — Official image + Wintent plugins (clothing-store, inward-mvi, content-marketing)
 # Build: docker build -f Dockerfile.wintent -t wintent/nocobase:latest .
-# The plugin is baked into the tarball so it's available on first startup.
+# Plugins are baked into the tarball so they're available on first startup.
 
 FROM nocobase/nocobase:latest
 
-# Inject plugin into the nocobase tarball
-# NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/
-# Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`
+# ─── plugin-clothing-store ───────────────────────────────────
 COPY packages/plugins/@wintent/plugin-clothing-store/package.json \
-     /tmp/plugin/package.json
+     /tmp/plugin-clothing-store/package.json
 COPY packages/plugins/@wintent/plugin-clothing-store/dist/ \
-     /tmp/plugin/dist/
+     /tmp/plugin-clothing-store/dist/
 COPY packages/plugins/@wintent/plugin-clothing-store/server.js \
-     /tmp/plugin/server.js
+     /tmp/plugin-clothing-store/server.js
 COPY packages/plugins/@wintent/plugin-clothing-store/server.d.ts \
-     /tmp/plugin/server.d.ts
+     /tmp/plugin-clothing-store/server.d.ts
 COPY packages/plugins/@wintent/plugin-clothing-store/client.js \
-     /tmp/plugin/client.js
+     /tmp/plugin-clothing-store/client.js
 COPY packages/plugins/@wintent/plugin-clothing-store/client.d.ts \
-     /tmp/plugin/client.d.ts
+     /tmp/plugin-clothing-store/client.d.ts
 
-# Re-pack nocobase.tar.gz with the plugin included
+# ─── plugin-inward-mvi (5 universal inward-axis collections) ────
+COPY packages/plugins/@wintent/plugin-inward-mvi/package.json \
+     /tmp/plugin-inward-mvi/package.json
+COPY packages/plugins/@wintent/plugin-inward-mvi/dist/ \
+     /tmp/plugin-inward-mvi/dist/
+COPY packages/plugins/@wintent/plugin-inward-mvi/server.js \
+     /tmp/plugin-inward-mvi/server.js
+
+# ─── plugin-content-marketing (3 facet-scoped collections) ──────
+COPY packages/plugins/@wintent/plugin-content-marketing/package.json \
+     /tmp/plugin-content-marketing/package.json
+COPY packages/plugins/@wintent/plugin-content-marketing/dist/ \
+     /tmp/plugin-content-marketing/dist/
+COPY packages/plugins/@wintent/plugin-content-marketing/server.js \
+     /tmp/plugin-content-marketing/server.js
+
+# ─── plugin-client-service (3 facet-scoped collections) ─────────
+COPY packages/plugins/@wintent/plugin-client-service/package.json \
+     /tmp/plugin-client-service/package.json
+COPY packages/plugins/@wintent/plugin-client-service/dist/ \
+     /tmp/plugin-client-service/dist/
+COPY packages/plugins/@wintent/plugin-client-service/server.js \
+     /tmp/plugin-client-service/server.js
+
+# Re-pack nocobase.tar.gz with all 3 plugins included.
+# NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/.
+# Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`,
+# subject to PLUGIN_PACKAGE_PREFIX env (which we set to include @wintent/plugin-).
 RUN cd /app && \
     mkdir -p /tmp/nocobase && \
     tar -zxf nocobase.tar.gz -C /tmp/nocobase && \
     mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store && \
-    cp -r /tmp/plugin/* /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store/ && \
+    cp -r /tmp/plugin-clothing-store/* /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store/ && \
+    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-inward-mvi && \
+    cp -r /tmp/plugin-inward-mvi/* /tmp/nocobase/storage/plugins/@wintent/plugin-inward-mvi/ && \
+    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-content-marketing && \
+    cp -r /tmp/plugin-content-marketing/* /tmp/nocobase/storage/plugins/@wintent/plugin-content-marketing/ && \
+    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-client-service && \
+    cp -r /tmp/plugin-client-service/* /tmp/nocobase/storage/plugins/@wintent/plugin-client-service/ && \
     rm nocobase.tar.gz && \
     cd /tmp/nocobase && tar -czf /app/nocobase.tar.gz . && \
-    rm -rf /tmp/nocobase /tmp/plugin
+    rm -rf /tmp/nocobase /tmp/plugin-clothing-store /tmp/plugin-inward-mvi /tmp/plugin-content-marketing /tmp/plugin-client-service

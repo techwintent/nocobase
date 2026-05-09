@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-content-marketing",
+  "displayName": "Wintent Content Marketing Facet Collections",
+  "displayName.zh-CN": "Wintent 内容营销 Facet 集合",
+  "description": "Per-facet collections for content-marketing (content_pieces / ip_aspirations / content_topics). Loaded for all packs but written-to only when the active vertical pack enables the content-marketing facet.",
+  "description.zh-CN": "内容营销 facet 数据底座 (3 个 collection)。所有 pack 都加载，但只有 facet enabled 才写入。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}
