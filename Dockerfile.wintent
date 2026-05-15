@@ -1,82 +1,100 @@
-# Wintent NocoBase — Official image + Wintent plugins (clothing-store, inward-mvi, content-marketing)
-# Build: docker build -f Dockerfile.wintent -t wintent/nocobase:latest .
-# Plugins are baked into the tarball so they're available on first startup.
+# Wintent NocoBase image — internalized plugin build (I5-H1) + first-boot
+# auto-enable wrapper (I5-H3).
+#
+# Build:   docker build -f Dockerfile.wintent -t wintent/nocobase:latest .
+# Plugins: 7 wintent plugins are built from src in the builder stage and
+#          injected into NocoBase's tarball overlay so they're discovered on
+#          first boot. wintent-init.sh runs `pm enable` once per plugin.
+#
+# History:
+#   v1 (pre-I5):    COPY pre-built dist/ from host (drift-prone — see
+#                   2026-05-12~13 retrospective). 6 plugins.
+#   v2 (I5-H1+H3):  multi-stage build; dist/ produced inside builder so
+#                   the image is the source of truth. ENTRYPOINT switched
+#                   to wintent-init.sh wrapper.
 
+# ─── Stage 1: builder — build all wintent plugin dist/ inside the image ───
+# Use the same Node 20 base as upstream NocoBase to match peer-dep environment.
+FROM node:20-bookworm AS wintent-builder
+
+WORKDIR /build
+
+# Copy NocoBase workspace files needed for `yarn build` to resolve plugins.
+# We copy the full workspace (root + packages/) rather than just plugins
+# because NocoBase's build pipeline (`nocobase-v1 build`) relies on lerna
+# workspace topology to resolve peer deps like @nocobase/database.
+COPY package.json yarn.lock lerna.json tsconfig.json /build/
+COPY packages/ /build/packages/
+
+# Install all workspace deps + run NocoBase root build, which produces
+# dist/server/index.js and dist/client/index.js for every workspace package
+# (including all 7 @wintent/plugin-*).
+RUN yarn config set network-timeout 600000 -g \
+ && yarn install --frozen-lockfile \
+ && yarn build
+
+# ─── Stage 2: runtime — official NocoBase image + plugin overlay ───
 FROM nocobase/nocobase:latest
 
-# ─── plugin-clothing-store ───────────────────────────────────
-COPY packages/plugins/@wintent/plugin-clothing-store/package.json \
-     /tmp/plugin-clothing-store/package.json
-COPY packages/plugins/@wintent/plugin-clothing-store/dist/ \
-     /tmp/plugin-clothing-store/dist/
-COPY packages/plugins/@wintent/plugin-clothing-store/server.js \
-     /tmp/plugin-clothing-store/server.js
-COPY packages/plugins/@wintent/plugin-clothing-store/server.d.ts \
-     /tmp/plugin-clothing-store/server.d.ts
-COPY packages/plugins/@wintent/plugin-clothing-store/client.js \
-     /tmp/plugin-clothing-store/client.js
-COPY packages/plugins/@wintent/plugin-clothing-store/client.d.ts \
-     /tmp/plugin-clothing-store/client.d.ts
+# Copy each wintent plugin's package.json + dist + thin wrapper files from
+# the builder stage. dist/ is now guaranteed fresh because it was just
+# produced by the builder stage above.
+ARG WINTENT_PLUGINS_PATH=/build/packages/plugins/@wintent
 
-# ─── plugin-inward-mvi (5 universal inward-axis collections) ────
-COPY packages/plugins/@wintent/plugin-inward-mvi/package.json \
-     /tmp/plugin-inward-mvi/package.json
-COPY packages/plugins/@wintent/plugin-inward-mvi/dist/ \
-     /tmp/plugin-inward-mvi/dist/
-COPY packages/plugins/@wintent/plugin-inward-mvi/server.js \
-     /tmp/plugin-inward-mvi/server.js
+# plugin-clothing-store
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/package.json /tmp/plugin-clothing-store/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/dist/         /tmp/plugin-clothing-store/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/server.js     /tmp/plugin-clothing-store/server.js
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/server.d.ts   /tmp/plugin-clothing-store/server.d.ts
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/client.js     /tmp/plugin-clothing-store/client.js
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-clothing-store/client.d.ts   /tmp/plugin-clothing-store/client.d.ts
 
-# ─── plugin-content-marketing (3 facet-scoped collections) ──────
-COPY packages/plugins/@wintent/plugin-content-marketing/package.json \
-     /tmp/plugin-content-marketing/package.json
-COPY packages/plugins/@wintent/plugin-content-marketing/dist/ \
-     /tmp/plugin-content-marketing/dist/
-COPY packages/plugins/@wintent/plugin-content-marketing/server.js \
-     /tmp/plugin-content-marketing/server.js
+# plugin-inward-mvi
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-inward-mvi/package.json /tmp/plugin-inward-mvi/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-inward-mvi/dist/         /tmp/plugin-inward-mvi/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-inward-mvi/server.js     /tmp/plugin-inward-mvi/server.js
 
-# ─── plugin-client-service (3 facet-scoped collections) ─────────
-COPY packages/plugins/@wintent/plugin-client-service/package.json \
-     /tmp/plugin-client-service/package.json
-COPY packages/plugins/@wintent/plugin-client-service/dist/ \
-     /tmp/plugin-client-service/dist/
-COPY packages/plugins/@wintent/plugin-client-service/server.js \
-     /tmp/plugin-client-service/server.js
+# plugin-content-marketing
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-content-marketing/package.json /tmp/plugin-content-marketing/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-content-marketing/dist/         /tmp/plugin-content-marketing/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-content-marketing/server.js     /tmp/plugin-content-marketing/server.js
 
-# ─── plugin-scheduling (2 facet-scoped collections) ─────────────
-COPY packages/plugins/@wintent/plugin-scheduling/package.json \
-     /tmp/plugin-scheduling/package.json
-COPY packages/plugins/@wintent/plugin-scheduling/dist/ \
-     /tmp/plugin-scheduling/dist/
-COPY packages/plugins/@wintent/plugin-scheduling/server.js \
-     /tmp/plugin-scheduling/server.js
+# plugin-client-service
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-client-service/package.json /tmp/plugin-client-service/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-client-service/dist/         /tmp/plugin-client-service/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-client-service/server.js     /tmp/plugin-client-service/server.js
 
-# ─── plugin-delivery (3 facet-scoped collections) ───────────────
-COPY packages/plugins/@wintent/plugin-delivery/package.json \
-     /tmp/plugin-delivery/package.json
-COPY packages/plugins/@wintent/plugin-delivery/dist/ \
-     /tmp/plugin-delivery/dist/
-COPY packages/plugins/@wintent/plugin-delivery/server.js \
-     /tmp/plugin-delivery/server.js
+# plugin-scheduling
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-scheduling/package.json /tmp/plugin-scheduling/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-scheduling/dist/         /tmp/plugin-scheduling/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-scheduling/server.js     /tmp/plugin-scheduling/server.js
 
-# Re-pack nocobase.tar.gz with all 6 plugins included.
+# plugin-delivery
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-delivery/package.json /tmp/plugin-delivery/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-delivery/dist/         /tmp/plugin-delivery/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-delivery/server.js     /tmp/plugin-delivery/server.js
+
+# plugin-config
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-config/package.json /tmp/plugin-config/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-config/dist/         /tmp/plugin-config/dist/
+
+# Re-pack nocobase.tar.gz with all 7 plugins included.
 # NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/.
 # Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`,
 # subject to PLUGIN_PACKAGE_PREFIX env (which we set to include @wintent/plugin-).
 RUN cd /app && \
     mkdir -p /tmp/nocobase && \
     tar -zxf nocobase.tar.gz -C /tmp/nocobase && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store && \
-    cp -r /tmp/plugin-clothing-store/* /tmp/nocobase/storage/plugins/@wintent/plugin-clothing-store/ && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-inward-mvi && \
-    cp -r /tmp/plugin-inward-mvi/* /tmp/nocobase/storage/plugins/@wintent/plugin-inward-mvi/ && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-content-marketing && \
-    cp -r /tmp/plugin-content-marketing/* /tmp/nocobase/storage/plugins/@wintent/plugin-content-marketing/ && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-client-service && \
-    cp -r /tmp/plugin-client-service/* /tmp/nocobase/storage/plugins/@wintent/plugin-client-service/ && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-scheduling && \
-    cp -r /tmp/plugin-scheduling/* /tmp/nocobase/storage/plugins/@wintent/plugin-scheduling/ && \
-    mkdir -p /tmp/nocobase/storage/plugins/@wintent/plugin-delivery && \
-    cp -r /tmp/plugin-delivery/* /tmp/nocobase/storage/plugins/@wintent/plugin-delivery/ && \
+    for plugin in plugin-clothing-store plugin-inward-mvi plugin-content-marketing plugin-client-service plugin-scheduling plugin-delivery plugin-config; do \
+      mkdir -p /tmp/nocobase/storage/plugins/@wintent/${plugin} && \
+      cp -r /tmp/${plugin}/* /tmp/nocobase/storage/plugins/@wintent/${plugin}/; \
+    done && \
     rm nocobase.tar.gz && \
     cd /tmp/nocobase && tar -czf /app/nocobase.tar.gz . && \
-    rm -rf /tmp/nocobase /tmp/plugin-clothing-store /tmp/plugin-inward-mvi /tmp/plugin-content-marketing /tmp/plugin-client-service /tmp/plugin-scheduling /tmp/plugin-delivery
+    rm -rf /tmp/nocobase /tmp/plugin-*
+
+# I5-H3: install wintent-init.sh as the container entrypoint.
+COPY wintent-init.sh /wintent-init.sh
+RUN chmod +x /wintent-init.sh
+
+CMD ["/wintent-init.sh"]
