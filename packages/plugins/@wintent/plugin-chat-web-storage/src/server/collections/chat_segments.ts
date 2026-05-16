@@ -15,6 +15,12 @@ export default defineCollection({
     { name: 'segment_number', type: 'integer', comment: '段序号 (1, 2, 3, ...)' },
     { name: 'message_count', type: 'integer', defaultValue: 0 },
     { name: 'round_count', type: 'integer', defaultValue: 0 },
+    {
+      name: 'summary',
+      type: 'text',
+      interface: 'textarea',
+      comment: 'AI 抽取的段总结（memory_extracted=true 后填充）',
+    },
     { name: 'memory_extracted', type: 'boolean', defaultValue: false, comment: '是否已抽取到记忆' },
     {
       name: 'status',

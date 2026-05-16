@@ -17,6 +17,9 @@ export default defineCollection({
       interface: 'input',
       uiSchema: { type: 'string', title: '会话标题', 'x-component': 'Input' },
     },
+    { name: 'current_segment_id', type: 'bigInt', comment: '指向当前 open segment（冗余便于 query）' },
+    { name: 'total_segments', type: 'integer', defaultValue: 0 },
+    { name: 'total_messages', type: 'integer', defaultValue: 0 },
     {
       name: 'created_at',
       type: 'date',
