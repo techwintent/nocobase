@@ -45,11 +45,5 @@ export default defineCollection({
       interface: 'datetime',
       uiSchema: { type: 'datetime', title: '采样时间', 'x-component': 'DatePicker' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

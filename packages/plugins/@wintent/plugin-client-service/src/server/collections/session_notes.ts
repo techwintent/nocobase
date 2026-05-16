@@ -69,17 +69,5 @@ export default defineCollection({
       comment: 'Lineage: 原 Excel 中此条 note 对应的 row（cell array）',
       uiSchema: { type: 'object', title: '原 Excel row', 'x-component': 'Input.JSON' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

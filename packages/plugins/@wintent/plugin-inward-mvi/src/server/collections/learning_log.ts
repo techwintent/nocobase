@@ -46,11 +46,5 @@ export default defineCollection({
       interface: 'textarea',
       uiSchema: { type: 'string', title: '应用场景', 'x-component': 'Input.TextArea' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

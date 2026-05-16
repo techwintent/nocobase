@@ -35,17 +35,5 @@ export default defineCollection({
       interface: 'json',
       uiSchema: { type: 'object', title: '边界规则', 'x-component': 'Input.JSON' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

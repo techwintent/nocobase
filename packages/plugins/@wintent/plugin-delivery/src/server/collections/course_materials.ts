@@ -50,17 +50,5 @@ export default defineCollection({
       comment: '若 type=text，此字段直接存正文',
       uiSchema: { type: 'string', title: '正文（仅 type=text）', 'x-component': 'Input.TextArea' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

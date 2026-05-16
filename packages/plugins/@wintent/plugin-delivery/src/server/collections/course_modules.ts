@@ -43,17 +43,5 @@ export default defineCollection({
       comment: '反向链接 reflections.id — 标记此模块来源于哪条 reflection（如适用）',
       uiSchema: { type: 'number', title: '源 reflection ID', 'x-component': 'InputNumber' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

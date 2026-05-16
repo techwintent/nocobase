@@ -64,17 +64,5 @@ export default defineCollection({
       comment: 'Lineage: 原 Excel 中此学员对应的 sheet 名（便于 re-import）',
       uiSchema: { type: 'string', title: '原 Excel sheet 名', 'x-component': 'Input' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

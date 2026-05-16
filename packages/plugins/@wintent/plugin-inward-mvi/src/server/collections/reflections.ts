@@ -39,11 +39,5 @@ export default defineCollection({
       uiSchema: { type: 'string', title: '关联类型', 'x-component': 'Input' },
     },
     { name: 'linked_entity_id', type: 'bigInt' },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
   ],
 });

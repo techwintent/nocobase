@@ -53,17 +53,5 @@ export default defineCollection({
       comment: 'Lineage: 原 Excel 中此 session 对应的 row 索引数组（便于 re-import 与 debug）',
       uiSchema: { type: 'object', title: '原 Excel row 索引', 'x-component': 'Input.JSON' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
   ],
 });
