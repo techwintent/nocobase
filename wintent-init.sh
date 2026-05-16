@@ -30,6 +30,7 @@ WINTENT_PLUGINS=(
   "@wintent/plugin-scheduling"
   "@wintent/plugin-delivery"
   "@wintent/plugin-config"
+  "@wintent/plugin-chat-web-storage"
 )
 
 NOCOBASE_HEALTH_URL="http://127.0.0.1:13000/api/app:getLang"

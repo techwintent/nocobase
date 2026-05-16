@@ -90,14 +90,19 @@ COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-delivery/server.js   
 COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-config/package.json /tmp/plugin-config/package.json
 COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-config/dist/         /tmp/plugin-config/dist/
 
-# Re-pack nocobase.tar.gz with all 7 plugins included.
+# plugin-chat-web-storage (I5-H2: 4 cross-cutting chat-web collections)
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/package.json /tmp/plugin-chat-web-storage/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/dist/         /tmp/plugin-chat-web-storage/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/server.js     /tmp/plugin-chat-web-storage/server.js
+
+# Re-pack nocobase.tar.gz with all 8 plugins included.
 # NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/.
 # Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`,
 # subject to PLUGIN_PACKAGE_PREFIX env (which we set to include @wintent/plugin-).
 RUN cd /app && \
     mkdir -p /tmp/nocobase && \
     tar -zxf nocobase.tar.gz -C /tmp/nocobase && \
-    for plugin in plugin-clothing-store plugin-inward-mvi plugin-content-marketing plugin-client-service plugin-scheduling plugin-delivery plugin-config; do \
+    for plugin in plugin-clothing-store plugin-inward-mvi plugin-content-marketing plugin-client-service plugin-scheduling plugin-delivery plugin-config plugin-chat-web-storage; do \
       mkdir -p /tmp/nocobase/storage/plugins/@wintent/${plugin} && \
       cp -r /tmp/${plugin}/* /tmp/nocobase/storage/plugins/@wintent/${plugin}/; \
     done && \

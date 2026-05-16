@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-chat-web-storage",
+  "displayName": "Wintent Chat-Web Storage Collections",
+  "displayName.zh-CN": "Wintent Chat-Web 存储集合",
+  "description": "Cross-cutting collections owned by chat-web (chat_sessions / chat_messages / chat_segments / knowledge_articles). Lives in NocoBase so fresh pgdata starts with the schema in place; chat-web no longer auto-creates tables on first :create call.",
+  "description.zh-CN": "chat-web 跨切关注点的存储集合，让 NocoBase 持有 schema 真源；新 pgdata 启动后这 4 张表已经建好。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}
