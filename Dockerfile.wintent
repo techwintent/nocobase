@@ -23,15 +23,27 @@ WORKDIR /build
 # We copy the full workspace (root + packages/) rather than just plugins
 # because NocoBase's build pipeline (`nocobase-v1 build`) relies on lerna
 # workspace topology to resolve peer deps like @nocobase/database.
+#
+# .env*.example files are required at CLI load time — even unused commands
+# (e2e/perf) read their example envs synchronously when the CLI registers,
+# so they must exist or `nocobase-v1 build` errors with ENOENT before any
+# plugin build runs.
 COPY package.json yarn.lock lerna.json tsconfig.json /build/
+COPY .env.example .env.e2e.example .env.test.example .env.perf.example /build/
 COPY packages/ /build/packages/
 
 # Install all workspace deps + run NocoBase root build, which produces
 # dist/server/index.js and dist/client/index.js for every workspace package
 # (including all 7 @wintent/plugin-*).
+#
+# --ignore-scripts: Skip postinstall hooks (notably the node-gyp compile of
+# isolated-vm — a NocoBase workflow plugin dep that fails to build on
+# arm64/Linux with node-gyp 7.1.2 + Node 20 cflags read-only error).
+# Wintent plugins are pure TypeScript collections; the build pipeline does
+# not need native modules to be compiled.
 RUN yarn config set network-timeout 600000 -g \
- && yarn install --frozen-lockfile \
- && yarn build
+ && yarn install --frozen-lockfile --ignore-scripts \
+ && yarn build --no-dts
 
 # ─── Stage 2: runtime — official NocoBase image + plugin overlay ───
 FROM nocobase/nocobase:latest
@@ -94,7 +106,11 @@ RUN cd /app && \
     rm -rf /tmp/nocobase /tmp/plugin-*
 
 # I5-H3: install wintent-init.sh as the container entrypoint.
+# Override the base image's ENTRYPOINT — otherwise our CMD becomes an arg to
+# docker-entrypoint.sh and our wrapper never runs. wintent-init.sh ends by
+# `exec /app/docker-entrypoint.sh "$@"`, preserving the original startup.
 COPY wintent-init.sh /wintent-init.sh
 RUN chmod +x /wintent-init.sh
 
-CMD ["/wintent-init.sh"]
+ENTRYPOINT ["/wintent-init.sh"]
+CMD []
