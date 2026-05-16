@@ -42,11 +42,7 @@ export default defineCollection({
     },
     { name: 'segment_id', type: 'bigInt', index: true, comment: 'FK → chat_segments.id (nullable)' },
     { name: 'sequence_in_segment', type: 'integer', comment: 'order within segment' },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
+    // NocoBase auto-adds Sequelize createdAt/updatedAt (camelCase NOT NULL)
+    // — see chat_sessions.ts NOTE for context. Mapper reads raw.createdAt.
   ],
 });

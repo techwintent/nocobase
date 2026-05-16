@@ -20,17 +20,13 @@ export default defineCollection({
     { name: 'current_segment_id', type: 'bigInt', comment: '指向当前 open segment（冗余便于 query）' },
     { name: 'total_segments', type: 'integer', defaultValue: 0 },
     { name: 'total_messages', type: 'integer', defaultValue: 0 },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
-    {
-      name: 'updated_at',
-      type: 'date',
-      interface: 'updatedAt',
-      uiSchema: { type: 'datetime', title: '更新时间', 'x-component': 'DatePicker' },
-    },
+    // NOTE on timestamps: NocoBase's collection model auto-adds Sequelize
+    // timestamp columns `createdAt` / `updatedAt` (camelCase, NOT NULL) by
+    // default. Defining explicit snake_case `created_at` / `updated_at`
+    // creates a duplicate column whose NOT NULL camelCase sibling fails on
+    // INSERT (verified 2026-05-16 round-trip smoke; same latent bug exists
+    // in all 7 pre-existing wintent plugins — see I5 Issue Plugin-Timestamp-Camelcase).
+    // For now we only fix this collection by relying on the default
+    // camelCase timestamps; mapper reads `raw.createdAt` for these fields.
   ],
 });

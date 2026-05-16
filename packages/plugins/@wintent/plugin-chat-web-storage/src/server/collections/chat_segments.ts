@@ -49,11 +49,7 @@ export default defineCollection({
       interface: 'datetime',
       uiSchema: { type: 'datetime', title: '结束时间', 'x-component': 'DatePicker' },
     },
-    {
-      name: 'created_at',
-      type: 'date',
-      interface: 'createdAt',
-      uiSchema: { type: 'datetime', title: '创建时间', 'x-component': 'DatePicker' },
-    },
+    // NocoBase auto-adds Sequelize createdAt/updatedAt (camelCase NOT NULL)
+    // — see chat_sessions.ts NOTE for context. Mapper reads raw.createdAt.
   ],
 });
