@@ -47,6 +47,18 @@ export default defineCollection({
       interface: 'json',
       comment: 'tags array as jsonb (NocoBase array type 与 PG text[] 兼容性视版本而定，jsonb 更稳)',
     },
+    {
+      // I7-T1: chat-web filters /api/knowledge_articles with {enabled:true}
+      // in multiple call sites (lib/chat/knowledge-prompt.ts, app/(chat)/api/
+      // {knowledge,tools,quick-actions}/route.ts). Without this column,
+      // Sequelize raised `column knowledge_articles.enabled does not exist`
+      // on every page load (100+ errors observed in I6 docker smoke).
+      name: 'enabled',
+      type: 'boolean',
+      defaultValue: true,
+      interface: 'checkbox',
+      uiSchema: { type: 'boolean', title: '启用', 'x-component': 'Checkbox' },
+    },
     // NocoBase auto-adds Sequelize createdAt/updatedAt (camelCase NOT NULL)
     // — see chat_sessions.ts NOTE for context. Mapper reads raw.createdAt.
   ],
