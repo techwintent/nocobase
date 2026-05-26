@@ -1,0 +1,13 @@
+{
+  "name": "@wintent/plugin-fitness-actions",
+  "displayName": "Wintent Fitness Actions Library",
+  "displayName.zh-CN": "Wintent 健身动作库",
+  "description": "Action catalog for the fitness-trainer vertical pack — preloads ~55 common Chinese exercises with category, muscle groups, typical sets/reps, equipment. Powers the I10-T10 LiveSession card's planning step (action picker) + the LLM's query_actions tool.",
+  "description.zh-CN": "健身教练 vertical pack 的动作底座 — 预置约 55 个常见动作（部位 / 主参与肌群 / 推荐组数次数 / 器械）。支撑 I10-T10 实时训练卡片的计划步骤（动作选择器）+ LLM 的 query_actions 工具。",
+  "version": "0.1.0",
+  "main": "dist/server/index.js",
+  "peerDependencies": {
+    "@nocobase/database": "2.x",
+    "@nocobase/server": "2.x"
+  }
+}

@@ -95,14 +95,23 @@ COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/pack
 COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/dist/         /tmp/plugin-chat-web-storage/dist/
 COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-chat-web-storage/server.js     /tmp/plugin-chat-web-storage/server.js
 
-# Re-pack nocobase.tar.gz with all 8 plugins included.
+# plugin-fitness-actions (I10-T9: action library for ft pack — 55-row seed)
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-fitness-actions/package.json /tmp/plugin-fitness-actions/package.json
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-fitness-actions/dist/         /tmp/plugin-fitness-actions/dist/
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-fitness-actions/server.js     /tmp/plugin-fitness-actions/server.js
+# Seed JSON sits inside src/server/seed-data/, but tsc emits it adjacent
+# to the compiled plugin.js. Copy from the builder's src to be safe in case
+# of @nocobase/build quirks dropping non-.ts assets.
+COPY --from=wintent-builder ${WINTENT_PLUGINS_PATH}/plugin-fitness-actions/src/server/seed-data/ /tmp/plugin-fitness-actions/dist/server/seed-data/
+
+# Re-pack nocobase.tar.gz with all 9 plugins included.
 # NocoBase extracts nocobase.tar.gz on first boot into /app/nocobase/.
 # Plugins in storage/plugins/ are auto-discovered by `yarn nocobase postinstall`,
 # subject to PLUGIN_PACKAGE_PREFIX env (which we set to include @wintent/plugin-).
 RUN cd /app && \
     mkdir -p /tmp/nocobase && \
     tar -zxf nocobase.tar.gz -C /tmp/nocobase && \
-    for plugin in plugin-clothing-store plugin-inward-mvi plugin-content-marketing plugin-client-service plugin-scheduling plugin-delivery plugin-config plugin-chat-web-storage; do \
+    for plugin in plugin-clothing-store plugin-inward-mvi plugin-content-marketing plugin-client-service plugin-scheduling plugin-delivery plugin-config plugin-chat-web-storage plugin-fitness-actions; do \
       mkdir -p /tmp/nocobase/storage/plugins/@wintent/${plugin} && \
       cp -r /tmp/${plugin}/* /tmp/nocobase/storage/plugins/@wintent/${plugin}/; \
     done && \
